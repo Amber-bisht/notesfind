@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { Download, Lock } from "lucide-react";
 
 interface NotePDFButtonProps {
-    contentRef: React.RefObject<HTMLElement>;
+    contentRef: React.RefObject<HTMLElement | null>;
     noteTitle: string;
 }
 
