@@ -14,6 +14,10 @@ export async function GET() {
     }
 }
 
+import { revalidatePath } from 'next/cache';
+
+// ... (GET handler remains same)
+
 export async function POST(req: NextRequest) {
     try {
         const token = req.cookies.get('token')?.value;
@@ -27,6 +31,7 @@ export async function POST(req: NextRequest) {
         await dbConnect();
         const category = await Category.create(body);
 
+        revalidatePath('/', 'layout'); // Purge cache
         return NextResponse.json({ category }, { status: 201 });
     } catch (error: any) {
         if (error.code === 11000) {

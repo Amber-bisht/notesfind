@@ -3,6 +3,7 @@ import dbConnect from '@/lib/db';
 import Note from '@/models/Note';
 import { verifyToken } from '@/lib/auth';
 import { UserRole } from '@/models/User';
+import { revalidatePath } from 'next/cache';
 
 export async function GET(req: NextRequest, props: { params: Promise<{ id: string }> }) {
     const params = await props.params;
@@ -42,6 +43,7 @@ export async function DELETE(req: NextRequest, props: { params: Promise<{ id: st
 
         await note.deleteOne();
 
+        revalidatePath('/', 'layout');
         return NextResponse.json({ success: true });
     } catch (error: any) {
         return NextResponse.json({ error: error.message }, { status: 500 });
@@ -77,6 +79,7 @@ export async function PUT(req: NextRequest, props: { params: Promise<{ id: strin
 
         const updatedNote = await Note.findByIdAndUpdate(params.id, body, { new: true, runValidators: true });
 
+        revalidatePath('/', 'layout');
         return NextResponse.json({ note: updatedNote });
     } catch (error: any) {
         if (error.code === 11000) {

@@ -22,6 +22,10 @@ export async function GET(req: NextRequest) {
     }
 }
 
+import { revalidatePath } from 'next/cache';
+
+// ... (GET handler same)
+
 export async function POST(req: NextRequest) {
     try {
         const token = req.cookies.get('token')?.value;
@@ -44,6 +48,7 @@ export async function POST(req: NextRequest) {
         await dbConnect();
         const note = await Note.create(body);
 
+        revalidatePath('/', 'layout');
         return NextResponse.json({ note }, { status: 201 });
     } catch (error: any) {
         if (error.code === 11000) {

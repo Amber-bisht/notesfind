@@ -18,6 +18,10 @@ export async function GET(req: NextRequest) {
     }
 }
 
+import { revalidatePath } from 'next/cache';
+
+// ... (GET handler same)
+
 export async function POST(req: NextRequest) {
     try {
         const token = req.cookies.get('token')?.value;
@@ -31,6 +35,7 @@ export async function POST(req: NextRequest) {
         await dbConnect();
         const subCategory = await SubCategory.create(body);
 
+        revalidatePath('/', 'layout');
         return NextResponse.json({ subCategory }, { status: 201 });
     } catch (error: any) {
         if (error.code === 11000) {

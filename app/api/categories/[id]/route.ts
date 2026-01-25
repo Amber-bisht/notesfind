@@ -3,6 +3,7 @@ import dbConnect from '@/lib/db';
 import Category from '@/models/Category';
 import { verifyToken } from '@/lib/auth';
 import { UserRole } from '@/models/User';
+import { revalidatePath } from 'next/cache';
 
 export async function DELETE(req: NextRequest, props: { params: Promise<{ id: string }> }) {
     const params = await props.params;
@@ -21,6 +22,7 @@ export async function DELETE(req: NextRequest, props: { params: Promise<{ id: st
             return NextResponse.json({ error: 'Category not found' }, { status: 404 });
         }
 
+        revalidatePath('/', 'layout');
         return NextResponse.json({ success: true });
     } catch (error: any) {
         return NextResponse.json({ error: error.message }, { status: 500 });
@@ -45,6 +47,7 @@ export async function PUT(req: NextRequest, props: { params: Promise<{ id: strin
             return NextResponse.json({ error: 'Category not found' }, { status: 404 });
         }
 
+        revalidatePath('/', 'layout');
         return NextResponse.json({ category });
     } catch (error: any) {
         if (error.code === 11000) {
