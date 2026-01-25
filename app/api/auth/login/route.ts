@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { verboseGoogleAuth, signToken } from '@/lib/auth';
+import { signToken } from '@/lib/auth';
+import { verboseGoogleAuth } from '@/lib/google-auth';
 import dbConnect from '@/lib/db';
 import User, { UserRole } from '@/models/User';
 import { cookies } from 'next/headers';
@@ -39,7 +40,7 @@ export async function POST(req: NextRequest) {
         }
 
         // Generate JWT
-        const token = signToken({
+        const token = await signToken({
             userId: user._id.toString(),
             email: user.email,
             role: user.role,

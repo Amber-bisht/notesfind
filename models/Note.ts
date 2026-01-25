@@ -8,6 +8,7 @@ export interface INote extends Document {
     authorId: mongoose.Types.ObjectId;
     images: string[];
     isPublished: boolean;
+    rank?: number;
     createdAt: Date;
     updatedAt: Date;
 }
@@ -46,9 +47,19 @@ const NoteSchema: Schema<INote> = new Schema(
             type: Boolean,
             default: true,
         },
+        rank: {
+            type: Number,
+            // required: [true, 'Please provide a rank'], // Making simple for now, maybe default? Or required? User request implies sorting.
+            // Let's make it not strictly required in schema for backward compatibility if any, but good to enforce.
+            // User said "rank - 1,2,3,4 etc -no duplicate rank"
+            // Let's make it required to ensure order.
+        },
     },
     { timestamps: true }
 );
+
+// Compound index to ensure rank is unique per subCategory
+NoteSchema.index({ subCategoryId: 1, rank: 1 }, { unique: true, sparse: true });
 
 const Note: Model<INote> =
     mongoose.models.Note || mongoose.model<INote>('Note', NoteSchema);

@@ -13,6 +13,7 @@ export function NoteForm({ initialData, onSuccess, onCancel }: NoteFormProps) {
     const [title, setTitle] = useState(initialData?.title || "");
     const [slug, setSlug] = useState(initialData?.slug || "");
     const [content, setContent] = useState(initialData?.content || "");
+    const [rank, setRank] = useState(initialData?.rank || "");
     const [subCategoryId, setSubCategoryId] = useState(initialData?.subCategoryId?._id || initialData?.subCategoryId || "");
     const [categories, setCategories] = useState<any[]>([]);
     const [subCategories, setSubCategories] = useState<any[]>([]);
@@ -77,33 +78,22 @@ export function NoteForm({ initialData, onSuccess, onCancel }: NoteFormProps) {
 
         setUploading(true);
         try {
-            // Get Signature
-            const sigRes = await fetch("/api/upload/signature", {
-                method: "POST",
-                body: JSON.stringify({ folder: "notes" })
-            });
-            const sigData = await sigRes.json();
-
-            if (!sigRes.ok) throw new Error(sigData.error);
-
-            // Upload to Cloudinary
+            // New upload flow uses /api/upload
             const formData = new FormData();
             formData.append("file", file);
-            formData.append("api_key", sigData.apiKey);
-            formData.append("timestamp", sigData.timestamp.toString());
-            formData.append("signature", sigData.signature);
-            formData.append("folder", "notes");
 
-            const uploadRes = await fetch(`https://api.cloudinary.com/v1_1/${sigData.cloudName}/image/upload`, {
+            const res = await fetch("/api/upload", {
                 method: "POST",
-                body: formData,
+                body: formData
             });
+            const data = await res.json();
 
-            const uploadData = await uploadRes.json();
-            setImages([...images, uploadData.secure_url]);
-        } catch (error) {
+            if (!res.ok) throw new Error(data.error);
+
+            setImages([...images, data.url]);
+        } catch (error: any) {
             console.error(error);
-            alert("Upload failed");
+            alert("Upload failed: " + error.message);
         } finally {
             setUploading(false);
         }
@@ -111,24 +101,29 @@ export function NoteForm({ initialData, onSuccess, onCancel }: NoteFormProps) {
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        const body = { title, slug, content, subCategoryId, images };
+        const body = { title, slug, content, rank: parseInt(rank), subCategoryId, images };
+
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        let res: any;
 
         if (initialData) {
             // Update
-            const res = await fetch(`/api/notes/${initialData._id}`, {
+            res = await fetch(`/api/notes/${initialData._id}`, {
                 method: "PUT",
                 body: JSON.stringify(body)
             });
-            if (res.ok) onSuccess();
-            else alert("Failed to update");
         } else {
             // Create
-            const res = await fetch("/api/notes", {
+            res = await fetch("/api/notes", {
                 method: "POST",
                 body: JSON.stringify(body)
             });
-            if (res.ok) onSuccess();
-            else alert("Failed to create");
+        }
+
+        if (res.ok) onSuccess();
+        else {
+            const data = await res.json();
+            alert("Failed: " + data.error);
         }
     };
 
@@ -182,6 +177,17 @@ export function NoteForm({ initialData, onSuccess, onCancel }: NoteFormProps) {
                         required
                     />
                 </div>
+            </div>
+
+            <div className="space-y-2">
+                <label className="text-sm font-medium">Rank</label>
+                <input
+                    type="number"
+                    value={rank}
+                    onChange={(e) => setRank(e.target.value)}
+                    className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                    required
+                />
             </div>
 
             <div className="space-y-2">

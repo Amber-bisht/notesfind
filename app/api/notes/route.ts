@@ -25,7 +25,7 @@ export async function GET(req: NextRequest) {
 export async function POST(req: NextRequest) {
     try {
         const token = req.cookies.get('token')?.value;
-        const payload = token ? verifyToken(token) : null;
+        const payload = token ? await verifyToken(token) : null;
 
         if (!payload) {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
@@ -47,7 +47,7 @@ export async function POST(req: NextRequest) {
         return NextResponse.json({ note }, { status: 201 });
     } catch (error: any) {
         if (error.code === 11000) {
-            return NextResponse.json({ error: 'Note slug already exists' }, { status: 400 });
+            return NextResponse.json({ error: 'Note slug or rank already exists in this sub-category' }, { status: 400 });
         }
         return NextResponse.json({ error: error.message }, { status: 400 });
     }

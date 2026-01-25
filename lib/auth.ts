@@ -1,9 +1,6 @@
-import jwt from 'jsonwebtoken';
-import { OAuth2Client } from 'google-auth-library';
+import { jwtVerify, SignJWT } from 'jose';
 
 const JWT_SECRET = process.env.JWT_SECRET!;
-const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID;
-const GOOGLE_CLIENT_SECRET = process.env.GOOGLE_CLIENT_SECRET;
 
 if (!JWT_SECRET) {
     throw new Error('Please define the JWT_SECRET environment variable');
@@ -13,41 +10,23 @@ export interface JWTPayload {
     userId: string;
     email: string;
     role: string;
+    [key: string]: any;
 }
 
-export function signToken(payload: JWTPayload): string {
-    return jwt.sign(payload, JWT_SECRET, { expiresIn: '7d' });
+export async function signToken(payload: JWTPayload): Promise<string> {
+    const secret = new TextEncoder().encode(JWT_SECRET);
+    return new SignJWT(payload)
+        .setProtectedHeader({ alg: 'HS256' })
+        .setExpirationTime('7d')
+        .sign(secret);
 }
 
-export function verifyToken(token: string): JWTPayload | null {
+export async function verifyToken(token: string): Promise<JWTPayload | null> {
     try {
-        return jwt.verify(token, JWT_SECRET) as JWTPayload;
+        const secret = new TextEncoder().encode(JWT_SECRET);
+        const { payload } = await jwtVerify(token, secret);
+        return payload as unknown as JWTPayload;
     } catch (error) {
         return null;
     }
-}
-
-const client = new OAuth2Client(
-    GOOGLE_CLIENT_ID,
-    GOOGLE_CLIENT_SECRET,
-    'postmessage'
-);
-
-export async function verifyGoogleToken(token: string) {
-    // If receiving an ID Token directly
-    const ticket = await client.verifyIdToken({
-        idToken: token,
-        audience: GOOGLE_CLIENT_ID,
-    });
-    return ticket.getPayload();
-}
-
-export async function verboseGoogleAuth(code: string) {
-    // If receiving an Auth Code to exchange
-    const { tokens } = await client.getToken(code);
-    const ticket = await client.verifyIdToken({
-        idToken: tokens.id_token!,
-        audience: GOOGLE_CLIENT_ID
-    });
-    return ticket.getPayload();
 }

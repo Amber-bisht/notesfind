@@ -22,7 +22,7 @@ export async function DELETE(req: NextRequest, props: { params: Promise<{ id: st
     const params = await props.params;
     try {
         const token = req.cookies.get('token')?.value;
-        const payload = token ? verifyToken(token) : null;
+        const payload = token ? await verifyToken(token) : null;
 
         if (!payload) {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
@@ -52,7 +52,7 @@ export async function PUT(req: NextRequest, props: { params: Promise<{ id: strin
     const params = await props.params;
     try {
         const token = req.cookies.get('token')?.value;
-        const payload = token ? verifyToken(token) : null;
+        const payload = token ? await verifyToken(token) : null;
 
         if (!payload) {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
@@ -79,6 +79,9 @@ export async function PUT(req: NextRequest, props: { params: Promise<{ id: strin
 
         return NextResponse.json({ note: updatedNote });
     } catch (error: any) {
+        if (error.code === 11000) {
+            return NextResponse.json({ error: 'Note slug or rank already exists in this sub-category' }, { status: 400 });
+        }
         return NextResponse.json({ error: error.message }, { status: 400 });
     }
 }

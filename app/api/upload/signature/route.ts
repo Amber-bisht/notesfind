@@ -11,7 +11,7 @@ cloudinary.config({
 export async function POST(req: NextRequest) {
     try {
         const token = req.cookies.get('token')?.value;
-        const payload = token ? verifyToken(token) : null;
+        const payload = token ? await verifyToken(token) : null;
 
         if (!payload) {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });

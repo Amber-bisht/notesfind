@@ -16,7 +16,7 @@ export async function middleware(request: NextRequest) {
             return NextResponse.redirect(new URL('/auth', request.url));
         }
 
-        const payload = verifyToken(token);
+        const payload = await verifyToken(token);
 
         if (!payload) {
             return NextResponse.redirect(new URL('/auth', request.url));

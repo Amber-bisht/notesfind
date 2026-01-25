@@ -20,16 +20,20 @@ export function Navbar() {
     }, [pathname]); // Re-fetch on navigation
 
     const navLinks = [
-        { href: "/", label: "Home" },
-        { href: "/notes", label: "Notes" }, // Assuming a general notes listing or we can rely on categories
+        { href: "/", label: "HOME" },
+        { href: "#services", label: "OUR SERVICES" },
+        { href: "#about", label: "ABOUT US" },
+        { href: "#contact", label: "CONTACT" },
+        { href: "/community", label: "JOIN COMMUNITY" },
+        { href: "/pages", label: "PAGES" },
     ];
 
     if (user) {
         if (["admin", "publisher"].includes(user.role)) {
-            navLinks.push({ href: "/dashboard", label: "Dashboard" });
+            navLinks.push({ href: "/dashboard", label: "DASHBOARD" });
         }
         if (user.role === "admin") {
-            navLinks.push({ href: "/admin", label: "Admin" });
+            navLinks.push({ href: "/admin", label: "ADMIN" });
         }
     }
 
@@ -37,18 +41,18 @@ export function Navbar() {
         <nav className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 sticky top-0 z-50">
             <div className="container mx-auto px-4 h-16 flex items-center justify-between">
                 <Link href="/" className="font-bold text-xl tracking-tight hover:opacity-80 transition-opacity">
-                    NotesFind
+                    notesfind
                 </Link>
 
                 {/* Desktop Nav */}
                 <div className="hidden md:flex items-center gap-6">
                     {navLinks.map((link) => (
                         <Link
-                            key={link.href}
+                            key={link.label}
                             href={link.href}
                             className={cn(
                                 "text-sm font-medium transition-colors hover:text-primary",
-                                pathname === link.href
+                                pathname === link.href || (pathname === '/' && link.href === '/')
                                     ? "text-foreground"
                                     : "text-muted-foreground"
                             )}
@@ -85,7 +89,7 @@ export function Navbar() {
                 <div className="md:hidden border-t p-4 space-y-4 bg-background">
                     {navLinks.map((link) => (
                         <Link
-                            key={link.href}
+                            key={link.label}
                             href={link.href}
                             onClick={() => setIsOpen(false)}
                             className="block text-sm font-medium hover:text-primary"
