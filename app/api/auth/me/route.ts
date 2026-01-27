@@ -18,7 +18,17 @@ export async function GET(req: NextRequest) {
 
     try {
         await dbConnect();
-        const user = await User.findById(payload.userId).select('-password'); // No password field anyway, but good practice
+        const user = await User.findById(payload.userId)
+            .select('-password')
+            .populate({
+                path: 'downloads.noteId',
+                populate: {
+                    path: 'subCategoryId',
+                    populate: {
+                        path: 'categoryId'
+                    }
+                }
+            });
 
         if (!user) {
             return NextResponse.json({ user: null });
@@ -26,10 +36,13 @@ export async function GET(req: NextRequest) {
 
         return NextResponse.json({
             user: {
+                _id: user._id,
                 email: user.email,
                 name: user.name,
                 role: user.role,
                 image: user.image,
+                downloads: user.downloads,
+                socials: user.socials,
             },
         });
     } catch (error) {

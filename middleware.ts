@@ -7,9 +7,10 @@ export async function middleware(request: NextRequest) {
 
     // Paths that require specific roles
     const isAdminPath = path.startsWith('/admin');
+    const isPublishPath = path.startsWith('/publish');
     const isDashboardPath = path.startsWith('/dashboard');
 
-    if (isAdminPath || isDashboardPath) {
+    if (isAdminPath || isDashboardPath || isPublishPath) {
         const token = request.cookies.get('token')?.value;
 
         if (!token) {
@@ -23,17 +24,19 @@ export async function middleware(request: NextRequest) {
         }
 
         if (isAdminPath && payload.role !== 'admin') {
-            return NextResponse.redirect(new URL('/', request.url)); // Or unauthorized page
-        }
-
-        if (isDashboardPath && !['admin', 'publisher'].includes(payload.role)) {
             return NextResponse.redirect(new URL('/', request.url));
         }
+
+        if (isPublishPath && !['admin', 'publisher'].includes(payload.role)) {
+            return NextResponse.redirect(new URL('/', request.url));
+        }
+
+        // isDashboardPath check removed as it is now open to all authenticated users
     }
 
     return NextResponse.next();
 }
 
 export const config = {
-    matcher: ['/admin/:path*', '/dashboard/:path*'],
+    matcher: ['/admin/:path*', '/dashboard/:path*', '/publish/:path*'],
 };

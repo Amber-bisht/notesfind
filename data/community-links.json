@@ -1,0 +1,65 @@
+[
+    {
+        "platform": "Telegram",
+        "icon": "MessageCircle",
+        "description": "Join our Telegram channels for instant updates and discussions.",
+        "links": [
+            {
+                "name": "Note.com Official",
+                "url": "https://t.me/note_com_official"
+            },
+            {
+                "name": "Note.com Discussion",
+                "url": "https://t.me/note_com_chat"
+            }
+        ]
+    },
+    {
+        "platform": "Facebook",
+        "icon": "Facebook",
+        "description": "Follow us on Facebook for news and community highlights.",
+        "links": [
+            {
+                "name": "Note.com Page",
+                "url": "https://facebook.com/note.com"
+            },
+            {
+                "name": "Note.com Community Group",
+                "url": "https://facebook.com/groups/note.com"
+            }
+        ]
+    },
+    {
+        "platform": "X (Twitter)",
+        "icon": "Twitter",
+        "description": "Follow us on X for the latest tweets and announcements.",
+        "links": [
+            {
+                "name": "@note_com",
+                "url": "https://x.com/note_com"
+            }
+        ]
+    },
+    {
+        "platform": "LinkedIn",
+        "icon": "Linkedin",
+        "description": "Connect with us on LinkedIn for professional updates.",
+        "links": [
+            {
+                "name": "Note.com Company",
+                "url": "https://linkedin.com/company/note-com"
+            }
+        ]
+    },
+    {
+        "platform": "YouTube",
+        "icon": "Youtube",
+        "description": "Subscribe to our YouTube channel for tutorials and guides.",
+        "links": [
+            {
+                "name": "Note.com Channel",
+                "url": "https://youtube.com/@note.com"
+            }
+        ]
+    }
+]

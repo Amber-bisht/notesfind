@@ -21,7 +21,7 @@ export function NoteViewer({ note, categorySlug, subCategorySlug }: NoteViewerPr
                     <ArrowLeft className="w-4 h-4 mr-2" /> Back to {note.subCategoryId?.name}
                 </Link>
 
-                <NotePDFButton contentRef={contentRef} noteTitle={note.title} />
+                <NotePDFButton contentRef={contentRef} noteTitle={note.title} noteId={note._id} noteSlug={note.slug} />
             </div>
 
             <article ref={contentRef} className="space-y-8 p-8 bg-background">

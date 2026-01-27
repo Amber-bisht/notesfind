@@ -63,10 +63,7 @@ export default async function Home() {
                 </div>
             </section>
 
-            {/* Ad Placeholder */}
-            <div className="w-full h-32 bg-muted/50 rounded-lg flex items-center justify-center border border-dashed">
-                <span className="text-muted-foreground text-sm">Advertisement Space</span>
-            </div>
+
 
             {/* Categories Grid */}
             <section id="categories" className="space-y-8">

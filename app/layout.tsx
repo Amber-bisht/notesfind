@@ -5,11 +5,18 @@ import { ThemeProvider } from "@/components/theme-provider";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 
+import { CookieBanner } from "@/components/CookieBanner";
+
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
     title: "NotesFind - Best Notes for AI, ML, DS",
     description: "Find high-quality notes for Artificial Intelligence, Machine Learning, Data Structures, and more.",
+    icons: {
+        icon: '/image.png',
+        shortcut: '/image.png',
+        apple: '/image.png',
+    },
 };
 
 export default function RootLayout({
@@ -32,6 +39,7 @@ export default function RootLayout({
                             {children}
                         </main>
                         <Footer />
+                        <CookieBanner />
                     </div>
                 </ThemeProvider>
             </body>

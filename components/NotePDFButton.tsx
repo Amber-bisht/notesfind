@@ -6,9 +6,11 @@ import { Download, Lock } from "lucide-react";
 interface NotePDFButtonProps {
     contentRef: React.RefObject<HTMLElement | null>;
     noteTitle: string;
+    noteId: string;
+    noteSlug: string;
 }
 
-export function NotePDFButton({ contentRef, noteTitle }: NotePDFButtonProps) {
+export function NotePDFButton({ contentRef, noteTitle, noteId, noteSlug }: NotePDFButtonProps) {
     const [user, setUser] = useState<any>(null);
     const [loading, setLoading] = useState(false);
     const [html2pdf, setHtml2pdf] = useState<any>(null);
@@ -28,9 +30,24 @@ export function NotePDFButton({ contentRef, noteTitle }: NotePDFButtonProps) {
         });
     }, []);
 
+    const trackDownload = async () => {
+        try {
+            await fetch("/api/user/downloads", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ noteId, slug: noteSlug }),
+            });
+        } catch (error) {
+            console.error("Failed to track download", error);
+        }
+    };
+
     const handleDownload = async () => {
         if (!user || !html2pdf || !contentRef.current) return;
         setLoading(true);
+
+        // Track download
+        trackDownload();
 
         const element = contentRef.current;
 

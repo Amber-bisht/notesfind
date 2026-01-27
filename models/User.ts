@@ -11,6 +11,20 @@ export interface IUser extends Document {
     name: string;
     image?: string;
     role: UserRole;
+    downloads: {
+        noteId: mongoose.Types.ObjectId;
+        slug: string;
+        downloadedAt: Date;
+    }[];
+    socials: {
+        github?: string;
+        twitter?: string;
+        linkedin?: string;
+        instagram?: string;
+        codeforces?: string;
+        leetcode?: string;
+        website?: string;
+    };
     createdAt: Date;
     updatedAt: Date;
 }
@@ -35,6 +49,20 @@ const UserSchema: Schema<IUser> = new Schema(
             type: String,
             enum: Object.values(UserRole),
             default: UserRole.USER,
+        },
+        downloads: [{
+            noteId: { type: Schema.Types.ObjectId, ref: 'Note' },
+            slug: String,
+            downloadedAt: { type: Date, default: Date.now }
+        }],
+        socials: {
+            github: String,
+            twitter: String,
+            linkedin: String,
+            instagram: String,
+            codeforces: String,
+            leetcode: String,
+            website: String
         },
     },
     { timestamps: true }
