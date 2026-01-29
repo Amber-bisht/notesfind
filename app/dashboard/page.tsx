@@ -208,7 +208,7 @@ export default function DashboardPage() {
                                                 )}
                                                 <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
                                                     <Link
-                                                        href={`/${note.subCategoryId?.categoryId?.slug}/${note.subCategoryId?.slug}/${note.slug}`}
+                                                        href={`/blog/${note.slug}`}
                                                         className="px-4 py-2 bg-white text-black rounded-full font-medium transform translate-y-4 group-hover:translate-y-0 transition-all"
                                                     >
                                                         View Note

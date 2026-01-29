@@ -11,7 +11,7 @@ export function Footer() {
                     {/* Brand */}
                     <div className="space-y-4">
                         <Link href="/" className="flex items-center gap-2">
-                            <img src="/image.png" alt="NotesFind" className="h-8 w-auto brightness-0 dark:brightness-0 dark:invert" />
+                            <img src="/logo-white.png" alt="NotesFind" className="h-12 w-auto invert dark:invert-0" />
                             <span className="font-bold text-xl">NotesFind</span>
                         </Link>
                         <p className="text-sm text-muted-foreground">
@@ -57,8 +57,8 @@ export function Footer() {
                     <div>
                         <h3 className="font-semibold mb-4">Contact</h3>
                         <ul className="space-y-2 text-sm text-muted-foreground">
-                            <li>Email: support@notesfind.com</li>
-                            <li>Location: San Francisco, CA</li>
+                            <li>Email: chankyafoundation14@gmail.com</li>
+                            <li>Location: Kedarnath, Uttarakhand</li>
                             <li>
                                 <Link href="/contact" className="text-primary hover:underline">
                                     Contact Support

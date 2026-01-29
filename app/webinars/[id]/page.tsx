@@ -205,8 +205,15 @@ export default function WebinarDetailPage({ params }: { params: Promise<{ id: st
 
                         <div className="prose prose-lg dark:prose-invert max-w-none">
                             <h3 className="text-2xl font-bold mb-4">About this Event</h3>
-                            <div className="whitespace-pre-wrap leading-relaxed text-muted-foreground">
-                                {webinar.longDescription || webinar.description}
+                            <div className="space-y-4">
+                                <p className="font-bold text-lg text-foreground whitespace-pre-wrap break-words">
+                                    {webinar.description}
+                                </p>
+                                {webinar.longDescription && (
+                                    <div className="whitespace-pre-wrap leading-relaxed text-muted-foreground break-words">
+                                        {webinar.longDescription}
+                                    </div>
+                                )}
                             </div>
                         </div>
                     </div>
@@ -252,8 +259,8 @@ export default function WebinarDetailPage({ params }: { params: Promise<{ id: st
                                     onClick={handleJoinClick}
                                     disabled={isJoined}
                                     className={`w-full py-4 text-lg font-bold rounded-xl transition-all shadow-lg transform active:scale-95 ${isJoined
-                                            ? "bg-green-100 text-green-700 cursor-default shadow-none"
-                                            : "bg-primary text-primary-foreground hover:bg-primary/90 hover:shadow-primary/25"
+                                        ? "bg-green-100 text-green-700 cursor-default shadow-none"
+                                        : "bg-primary text-primary-foreground hover:bg-primary/90 hover:shadow-primary/25"
                                         }`}
                                 >
                                     {isJoined ? "You're Registered" : "Register Now"}

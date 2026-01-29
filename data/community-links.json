@@ -61,5 +61,16 @@
                 "url": "https://youtube.com/@note.com"
             }
         ]
+    },
+    {
+        "platform": "Instagram",
+        "icon": "Instagram",
+        "description": "Follow us on Instagram for visual updates and stories.",
+        "links": [
+            {
+                "name": "@note_com",
+                "url": "https://instagram.com/note.com"
+            }
+        ]
     }
 ]

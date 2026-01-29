@@ -67,7 +67,7 @@ export default async function SubCategoryPage(props: Params) {
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {notes.map((note: any) => (
-                    <Link key={note._id} href={`/${params.category}/${params.subcategory}/${note.slug}`} className="group rounded-xl border bg-card text-card-foreground shadow transition-all hover:shadow-lg hover:-translate-y-1 block overflow-hidden h-full flex flex-col">
+                    <Link key={note._id} href={`/blog/${note.slug}`} className="group rounded-xl border bg-card text-card-foreground shadow transition-all hover:shadow-lg hover:-translate-y-1 block overflow-hidden h-full flex flex-col">
                         <div className="relative aspect-video w-full overflow-hidden bg-muted">
                             {note.images?.[0] ? (
                                 <img

@@ -7,6 +7,9 @@ import { useEffect, useState } from "react";
 import { Menu, X } from "lucide-react";
 import { useTheme } from "next-themes";
 import { Search } from "./Search";
+import { Nunito } from "next/font/google";
+
+const nunito = Nunito({ subsets: ["latin"], weight: ["900"] });
 
 export function Navbar() {
     const [isOpen, setIsOpen] = useState(false);
@@ -23,29 +26,55 @@ export function Navbar() {
     }, [pathname]);
 
     // Use CSS filters for logo color
-    const logoClass = mounted && (theme === 'light' || resolvedTheme === 'light')
-        ? "h-12 w-auto brightness-0"
-        : "h-12 w-auto brightness-0 invert";
+    // Logo is now a proper image, remove filters that turn it into a black box
+    const logoClass = "h-24 w-auto object-contain";
 
     const navLinks = [
         { href: "/", label: "HOME" },
-        { href: "/#categories", label: "CATEGORIES" },
+        { href: "/categories", label: "CATEGORIES" },
         { href: "/webinars", label: "WEBINARS" },
         { href: "/services", label: "SERVICES" },
         { href: "/community", label: "JOIN COMMUNITY" },
     ];
 
-    if (user) {
-        navLinks.push({ href: "/dashboard", label: "DASHBOARD" });
+    const adminLinks = [
+        { href: "/publish", label: "PUBLISH" },
+        { href: "/publish/webinars", label: "WEBINARS" },
+        { href: "/admin/services", label: "SERVICES" },
+        { href: "/publish/request", label: "REQUESTS" },
+        { href: "/publish/contact", label: "CONTACT" },
+        { href: "/", label: "EXIT ADMIN" }, // Link to go back to main site
+    ];
+
+    let currentLinks = navLinks;
+    // Check if user is admin/publisher AND accessing admin routes
+    const isAdminRoute = pathname.startsWith('/admin') || pathname.startsWith('/publish');
+    const isAuthorized = user && (user.role === 'admin' || user.role === 'publisher');
+
+    if (isAuthorized && isAdminRoute) {
+        currentLinks = adminLinks;
+    } else if (user && (user.role === 'admin' || user.role === 'publisher')) {
+        // Optionally push a "Dashboard" or "Admin" link to main nav if they are authorized but on main site
+        // For now, let's keep the user-dashboard link, maybe add specific Admin entry point?
+        // user.role check is enough to show Dashboard, maybe we redirect Dashboard to Admin?
+        // Keeping as is for user constraints, just swapping if *in* admin route.
+    }
+
+    if (user && !isAdminRoute) {
+        // Normal user dashboard link, effectively replacing the old "Push" logic with a consistent list
+        // Check if already exists to avoid dupes on re-renders if we were pushing
+        if (!currentLinks.find(l => l.label === "DASHBOARD")) {
+            currentLinks = [...currentLinks, { href: "/dashboard", label: "DASHBOARD" }];
+        }
     }
 
     return (
-        <nav className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 sticky top-0 z-50">
+        <nav className="bg-black border-b-0 sticky top-0 z-50">
             <div className="container mx-auto px-4 h-24 flex items-center justify-between">
                 {/* Logo & Title */}
                 <Link href="/" className="flex items-center gap-3 hover:opacity-80 transition-opacity">
-                    <img src="/image.png" alt="NotesFind" className={logoClass} />
-                    <span className="text-3xl font-black tracking-tighter hidden lg:block">NotesFind</span>
+                    <img src="/logo-white.png" alt="NotesFind" className={logoClass} />
+                    <span className={`text-3xl font-black tracking-tighter hidden lg:block text-white ${nunito.className}`}>NotesFind</span>
                 </Link>
 
                 {/* Search Bar */}
@@ -55,15 +84,15 @@ export function Navbar() {
 
                 {/* Desktop Nav */}
                 <div className="hidden md:flex items-center gap-6">
-                    {navLinks.map((link) => (
+                    {currentLinks.map((link) => (
                         <Link
                             key={link.label}
                             href={link.href}
                             className={cn(
                                 "text-sm font-bold transition-colors hover:text-primary tracking-wide whitespace-nowrap",
                                 pathname === link.href || (pathname === '/' && link.href === '/')
-                                    ? "text-foreground"
-                                    : "text-muted-foreground"
+                                    ? "text-white"
+                                    : "text-gray-400"
                             )}
                         >
                             {link.label}
@@ -82,7 +111,7 @@ export function Navbar() {
                                 )}
                             </Link>
                         ) : (
-                            <Link href="/auth" className="text-base font-medium text-muted-foreground hover:text-primary">
+                            <Link href="/auth" className="text-base font-medium text-gray-300 hover:text-white">
                                 Login
                             </Link>
                         )}
@@ -91,7 +120,7 @@ export function Navbar() {
 
                 {/* Mobile Nav Toggle */}
                 <div className="md:hidden flex items-center gap-4">
-                    <button onClick={() => setIsOpen(!isOpen)} className="p-2">
+                    <button onClick={() => setIsOpen(!isOpen)} className="p-2 text-white">
                         {isOpen ? <X className="h-8 w-8" /> : <Menu className="h-8 w-8" />}
                     </button>
                 </div>
@@ -99,19 +128,19 @@ export function Navbar() {
 
             {/* Mobile Menu */}
             {isOpen && (
-                <div className="md:hidden border-t p-4 space-y-4 bg-background fixed inset-x-0 top-24 bottom-0 overflow-y-auto z-40">
-                    {navLinks.map((link) => (
+                <div className="md:hidden border-t border-gray-800 p-4 space-y-4 bg-black fixed inset-x-0 top-24 bottom-0 overflow-y-auto z-40">
+                    {currentLinks.map((link) => (
                         <Link
                             key={link.label}
                             href={link.href}
                             onClick={() => setIsOpen(false)}
-                            className="block text-lg font-bold py-2 hover:text-primary"
+                            className="block text-lg font-bold py-2 text-white hover:text-primary"
                         >
                             {link.label}
                         </Link>
                     ))}
                     {!user && (
-                        <Link href="/auth" onClick={() => setIsOpen(false)} className="block text-lg font-bold py-2 hover:text-primary">
+                        <Link href="/auth" onClick={() => setIsOpen(false)} className="block text-lg font-bold py-2 text-white hover:text-primary">
                             Login
                         </Link>
                     )}
