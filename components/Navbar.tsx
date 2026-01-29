@@ -3,20 +3,20 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
-import { ThemeToggle } from "@/components/ThemeToggle";
 import { useEffect, useState } from "react";
 import { Menu, X } from "lucide-react";
 import { useTheme } from "next-themes";
+import { Search } from "./Search";
 
 export function Navbar() {
     const [isOpen, setIsOpen] = useState(false);
     const pathname = usePathname();
-    const [user, setUser] = useState<any>(null);
+    const [user, setUser] = useState<any>(null); // eslint-disable-line @typescript-eslint/no-explicit-any
     const { theme, resolvedTheme } = useTheme();
     const [mounted, setMounted] = useState(false);
 
     useEffect(() => {
-        setMounted(true);
+        setMounted(true); // eslint-disable-line react-hooks/set-state-in-effect
         fetch('/api/auth/me')
             .then(res => res.json())
             .then(data => setUser(data.user));
@@ -30,19 +30,13 @@ export function Navbar() {
     const navLinks = [
         { href: "/", label: "HOME" },
         { href: "/#categories", label: "CATEGORIES" },
+        { href: "/webinars", label: "WEBINARS" },
+        { href: "/services", label: "SERVICES" },
         { href: "/community", label: "JOIN COMMUNITY" },
-        { href: "/pages", label: "PAGES" },
     ];
 
     if (user) {
         navLinks.push({ href: "/dashboard", label: "DASHBOARD" });
-
-        if (["admin", "publisher"].includes(user.role)) {
-            navLinks.push({ href: "/publish", label: "PUBLISH" });
-        }
-        if (user.role === "admin") {
-            navLinks.push({ href: "/admin", label: "ADMIN" });
-        }
     }
 
     return (
@@ -51,17 +45,22 @@ export function Navbar() {
                 {/* Logo & Title */}
                 <Link href="/" className="flex items-center gap-3 hover:opacity-80 transition-opacity">
                     <img src="/image.png" alt="NotesFind" className={logoClass} />
-                    <span className="text-3xl font-black tracking-tighter">NotesFind</span>
+                    <span className="text-3xl font-black tracking-tighter hidden lg:block">NotesFind</span>
                 </Link>
 
+                {/* Search Bar */}
+                <div className="flex-1 max-w-md mx-6">
+                    <Search />
+                </div>
+
                 {/* Desktop Nav */}
-                <div className="hidden md:flex items-center gap-8">
+                <div className="hidden md:flex items-center gap-6">
                     {navLinks.map((link) => (
                         <Link
                             key={link.label}
                             href={link.href}
                             className={cn(
-                                "text-base font-bold transition-colors hover:text-primary tracking-wide",
+                                "text-sm font-bold transition-colors hover:text-primary tracking-wide whitespace-nowrap",
                                 pathname === link.href || (pathname === '/' && link.href === '/')
                                     ? "text-foreground"
                                     : "text-muted-foreground"

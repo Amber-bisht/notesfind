@@ -28,7 +28,8 @@ export async function GET(req: NextRequest) {
                         path: 'categoryId'
                     }
                 }
-            });
+            })
+            .populate('joinedWebinars.webinarId');
 
         if (!user) {
             return NextResponse.json({ user: null });
@@ -43,9 +44,11 @@ export async function GET(req: NextRequest) {
                 image: user.image,
                 downloads: user.downloads,
                 socials: user.socials,
+                phone: user.phone,
+                joinedWebinars: user.joinedWebinars,
             },
         });
-    } catch (error) {
+    } catch {
         return NextResponse.json({ user: null });
     }
 }

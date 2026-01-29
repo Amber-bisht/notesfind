@@ -15,13 +15,16 @@ export async function PATCH(req: NextRequest) {
         }
 
         const body = await req.json();
-        const { socials } = body;
+        const { socials, phone } = body;
 
         await dbConnect();
 
+        const updateData: any = { socials };
+        if (phone) updateData.phone = phone;
+
         const user = await User.findOneAndUpdate(
             { email: session.email },
-            { $set: { socials } },
+            { $set: updateData },
             { new: true }
         );
 

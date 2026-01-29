@@ -1,20 +1,17 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Plus, Pencil, Trash2, Download, User, Settings, FileText, Github, Linkedin, Twitter, Globe, Code } from "lucide-react";
+import { Plus, Pencil, Trash2, Download, User, FileText, Github, Linkedin, Twitter, Globe, Code, MapPin } from "lucide-react";
 import { NoteForm } from "@/components/NoteForm";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 
 export default function DashboardPage() {
-    const [user, setUser] = useState<any>(null);
-    const [notes, setNotes] = useState<any[]>([]);
+    const [user, setUser] = useState<any>(null); // eslint-disable-line @typescript-eslint/no-explicit-any
+    const [notes, setNotes] = useState<any[]>([]); // eslint-disable-line @typescript-eslint/no-explicit-any
     const [isCreating, setIsCreating] = useState(false);
-    const [editingNote, setEditingNote] = useState<any>(null);
+    const [editingNote, setEditingNote] = useState<any>(null); // eslint-disable-line @typescript-eslint/no-explicit-any
     const [activeTab, setActiveTab] = useState("downloads");
     const [loading, setLoading] = useState(true);
-
-    const router = useRouter();
 
     useEffect(() => {
         fetchData();
@@ -33,7 +30,7 @@ export default function DashboardPage() {
 
             // If publisher/admin, fetch their created notes
             if (['admin', 'publisher'].includes(userData.user.role)) {
-                let url = '/api/notes';
+                const url = '/api/notes';
                 const res = await fetch(url);
                 const data = await res.json();
                 const allNotes = data.notes || [];
@@ -41,7 +38,7 @@ export default function DashboardPage() {
                 if (userData.user.role === 'admin') {
                     setNotes(allNotes);
                 } else {
-                    setNotes(allNotes.filter((n: any) => n.authorId?.email === userData.user.email));
+                    setNotes(allNotes.filter((n: any) => n.authorId?.email === userData.user.email)); // eslint-disable-line @typescript-eslint/no-explicit-any
                 }
                 setActiveTab("mynotes"); // Default to my notes for creators
             } else {
@@ -59,7 +56,7 @@ export default function DashboardPage() {
         setEditingNote(null);
     }
 
-    const handleEdit = (note: any) => {
+    const handleEdit = (note: any) => { // eslint-disable-line @typescript-eslint/no-explicit-any
         setEditingNote(note);
         setIsCreating(true);
     }
@@ -114,6 +111,15 @@ export default function DashboardPage() {
                         }`}
                 >
                     <User className="w-4 h-4" /> Profile
+                </button>
+                <button
+                    onClick={() => setActiveTab("webinars")}
+                    className={`px-6 py-3 text-sm font-medium border-b-2 transition-colors flex items-center gap-2 ${activeTab === "webinars"
+                        ? "border-primary text-primary"
+                        : "border-transparent text-muted-foreground hover:text-foreground"
+                        }`}
+                >
+                    <Globe className="w-4 h-4" /> Webinars
                 </button>
             </div>
 
@@ -175,7 +181,7 @@ export default function DashboardPage() {
                                 ))}
                                 {notes.length === 0 && (
                                     <div className="col-span-full text-center py-12 text-muted-foreground bg-muted/30 rounded-xl border border-dashed">
-                                        You haven't created any notes yet.
+                                        You haven&apos;t created any notes yet.
                                     </div>
                                 )}
                             </div>
@@ -187,7 +193,7 @@ export default function DashboardPage() {
                     <div className="space-y-6">
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                             {user.downloads && user.downloads.length > 0 ? (
-                                user.downloads.map((item: any, index: number) => {
+                                user.downloads.map((item: any, index: number) => { // eslint-disable-line @typescript-eslint/no-explicit-any
                                     const note = item.noteId;
                                     if (!note) return null; // Handle deleted notes
                                     return (
@@ -222,7 +228,7 @@ export default function DashboardPage() {
                                 <div className="col-span-full text-center py-20 text-muted-foreground bg-muted/30 rounded-xl border border-dashed">
                                     <div className="flex flex-col items-center gap-2">
                                         <Download className="w-10 h-10 opacity-20" />
-                                        <p>You haven't downloaded any notes yet.</p>
+                                        <p>You haven&apos;t downloaded any notes yet.</p>
                                     </div>
                                 </div>
                             )}
@@ -233,16 +239,115 @@ export default function DashboardPage() {
                 {activeTab === "profile" && (
                     <div className="max-w-2xl mx-auto border rounded-xl bg-card p-8">
                         <h2 className="text-xl font-semibold mb-6">Profile Settings</h2>
-                        <ProfileForm initialSocials={user.socials} onUpdate={fetchData} />
+                        <ProfileForm initialSocials={user.socials} initialPhone={user.phone} onUpdate={fetchData} />
                     </div>
+                )}
+
+                {activeTab === "webinars" && (
+                    <WebinarsTab user={user} />
                 )}
             </div>
         </div>
     );
 }
 
-function ProfileForm({ initialSocials, onUpdate }: { initialSocials: any, onUpdate: () => void }) {
+function WebinarsTab({ user }: { user: any }) { // eslint-disable-line @typescript-eslint/no-explicit-any
+    const joinedWebinars = user.joinedWebinars || [];
+
+    if (joinedWebinars.length === 0) {
+        return (
+            <div className="col-span-full text-center py-20 text-muted-foreground bg-muted/30 rounded-xl border border-dashed">
+                <div className="flex flex-col items-center gap-2">
+                    <Globe className="w-10 h-10 opacity-20" />
+                    <p>You haven&apos;t joined any webinars yet.</p>
+                    <Link href="/webinars" className="mt-2 px-4 py-2 bg-primary text-primary-foreground rounded-md text-sm hover:bg-primary/90">
+                        Explore Webinars
+                    </Link>
+                </div>
+            </div>
+        );
+    }
+
+    return (
+        <div className="space-y-6">
+            <h2 className="text-xl font-semibold">Your Scheduled Webinars</h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {joinedWebinars.map((jw: any) => { // eslint-disable-line @typescript-eslint/no-explicit-any
+                    const webinar = jw.webinarId;
+                    if (!webinar) return null;
+
+                    return (
+                        <div key={webinar._id} className="border rounded-xl bg-card overflow-hidden hover:shadow-lg transition-all duration-300 flex flex-col group relative">
+                            <div className="aspect-video bg-muted relative overflow-hidden">
+                                {webinar.image ? (
+                                    <img src={webinar.image} alt={webinar.title} className="w-full h-full object-cover" />
+                                ) : (
+                                    <div className="flex items-center justify-center h-full bg-primary/10 text-primary">
+                                        Webinar
+                                    </div>
+                                )}
+                                <div className="absolute top-2 right-2 bg-black/70 text-white text-xs px-2 py-1 rounded">
+                                    {new Date(webinar.timestamp).toLocaleDateString()}
+                                </div>
+                                <div className={`absolute top-2 left-2 text-white text-xs px-2 py-1 rounded uppercase font-bold tracking-wider ${webinar.type === 'offline' ? 'bg-orange-500/90' : 'bg-blue-500/90'
+                                    }`}>
+                                    {webinar.type === 'offline' ? 'Offline' : 'Online'}
+                                </div>
+                            </div>
+                            <div className="p-5 flex-1 flex flex-col">
+                                <h3 className="font-bold text-lg mb-2 line-clamp-1">{webinar.title}</h3>
+                                <div className="mb-4">
+                                    {webinar.type === 'offline' ? (
+                                        <div className="text-sm text-muted-foreground flex items-start gap-2">
+                                            <MapPin className="w-4 h-4 mt-0.5 flex-shrink-0" />
+                                            <div>
+                                                <p className="font-medium text-foreground">{webinar.venue}</p>
+                                                <p>{webinar.address}</p>
+                                            </div>
+                                        </div>
+                                    ) : (
+                                        <p className="text-sm text-muted-foreground line-clamp-3">{webinar.description}</p>
+                                    )}
+                                </div>
+
+                                <div className="mt-auto space-y-2">
+                                    <Link href={`/webinars/${webinar._id}`} className="block w-full text-center py-2 bg-muted text-foreground rounded-md text-sm font-medium hover:bg-muted/80">
+                                        View Details
+                                    </Link>
+
+                                    {webinar.type === 'online' && webinar.link && (
+                                        <a
+                                            href={webinar.link}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            className="flex w-full items-center justify-center py-2 bg-green-600 text-white rounded-md font-medium hover:bg-green-700 transition-colors"
+                                        >
+                                            Enter Room
+                                        </a>
+                                    )}
+                                    {webinar.type === 'offline' && webinar.mapLink && (
+                                        <a
+                                            href={webinar.mapLink}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            className="flex w-full items-center justify-center py-2 bg-primary text-primary-foreground rounded-md font-medium hover:bg-primary/90 transition-colors"
+                                        >
+                                            Get Directions
+                                        </a>
+                                    )}
+                                </div>
+                            </div>
+                        </div>
+                    );
+                })}
+            </div>
+        </div>
+    );
+}
+
+function ProfileForm({ initialSocials, initialPhone, onUpdate }: { initialSocials: any, initialPhone?: string, onUpdate: () => void }) { // eslint-disable-line @typescript-eslint/no-explicit-any
     const [socials, setSocials] = useState(initialSocials || {});
+    const [phone, setPhone] = useState(initialPhone || "");
     const [saving, setSaving] = useState(false);
     const [message, setMessage] = useState("");
 
@@ -259,7 +364,7 @@ function ProfileForm({ initialSocials, onUpdate }: { initialSocials: any, onUpda
             const res = await fetch('/api/user/profile', {
                 method: 'PATCH',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ socials })
+                body: JSON.stringify({ socials, phone })
             });
 
             if (res.ok) {
@@ -278,6 +383,18 @@ function ProfileForm({ initialSocials, onUpdate }: { initialSocials: any, onUpda
     return (
         <form onSubmit={handleSubmit} className="space-y-6">
             <div className="grid grid-cols-1 gap-6">
+                <div className="space-y-2">
+                    <label className="text-sm font-medium flex items-center gap-2">
+                        Phone Number
+                    </label>
+                    <input
+                        type="tel"
+                        value={phone}
+                        onChange={(e) => setPhone(e.target.value)}
+                        className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+                        placeholder="+1 234 567 8900"
+                    />
+                </div>
                 <div className="space-y-2">
                     <label className="text-sm font-medium flex items-center gap-2">
                         <Github className="w-4 h-4" /> GitHub

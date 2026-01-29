@@ -25,6 +25,11 @@ export interface IUser extends Document {
         leetcode?: string;
         website?: string;
     };
+    joinedWebinars: {
+        webinarId: mongoose.Types.ObjectId;
+        joinedAt: Date;
+    }[];
+    phone?: string;
     createdAt: Date;
     updatedAt: Date;
 }
@@ -64,6 +69,13 @@ const UserSchema: Schema<IUser> = new Schema(
             leetcode: String,
             website: String
         },
+        phone: {
+            type: String,
+        },
+        joinedWebinars: [{
+            webinarId: { type: Schema.Types.ObjectId, ref: 'Webinar' },
+            joinedAt: { type: Date, default: Date.now }
+        }],
     },
     { timestamps: true }
 );
