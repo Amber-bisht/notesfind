@@ -4,14 +4,14 @@ import Webinar from '@/models/Webinar';
 import User, { UserRole } from '@/models/User';
 import { verifyToken } from '@/lib/auth';
 
-export async function GET(req: NextRequest) {
+export async function GET() {
     await dbConnect();
 
     try {
         const webinars = await Webinar.find({}).sort({ timestamp: 1 }).populate('createdBy', 'name email');
 
         return NextResponse.json({ success: true, webinars }, { status: 200 });
-    } catch (error) {
+    } catch {
         return NextResponse.json(
             { success: false, error: 'Failed to fetch webinars' },
             { status: 500 }
@@ -72,7 +72,7 @@ export async function POST(req: NextRequest) {
         });
 
         return NextResponse.json({ success: true, webinar }, { status: 201 });
-    } catch (error) {
+    } catch {
         return NextResponse.json(
             { success: false, error: 'Failed to create webinar' },
             { status: 500 }

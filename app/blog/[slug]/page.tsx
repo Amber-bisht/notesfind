@@ -1,7 +1,7 @@
 import { notFound } from 'next/navigation';
 import dbConnect from '@/lib/db';
 import Note from '@/models/Note';
-import User from '@/models/User'; // Ensure User model is registered for population
+// Ensure User model is registered for population
 import { NoteViewer } from '@/components/NoteViewer';
 import { ArrowLeft, BookOpen, ChevronRight } from 'lucide-react';
 import Link from 'next/link';
@@ -17,10 +17,11 @@ export async function generateStaticParams() {
     try {
         await dbConnect();
         const notes = await Note.find({ isPublished: true }).sort({ createdAt: -1 }).limit(100).select('slug').lean();
-        return notes.map((note: any) => ({
+        return notes.map((note: { slug: string }) => ({
             slug: note.slug,
         }));
     } catch (e) {
+        console.warn('DB connection failed during SSG for blog posts', e);
         return [];
     }
 }
@@ -28,7 +29,7 @@ export async function generateStaticParams() {
 export async function generateMetadata(props: Params) {
     const params = await props.params;
     await dbConnect();
-    const note = await Note.findOne({ slug: params.slug }).lean() as any;
+    const note = await Note.findOne({ slug: params.slug }).lean() as { title: string; content: string; images?: string[] } | null;
     if (!note) return { title: 'Not Found' };
 
     return {
@@ -50,7 +51,15 @@ export default async function NotePage(props: Params) {
             path: 'subCategoryId',
             populate: { path: 'categoryId' }
         })
-        .lean() as any;
+        .lean() as {
+            _id: string;
+            title: string;
+            content: string;
+            images?: string[];
+            subCategoryId?: { _id: string; slug: string; name: string; categoryId?: { slug: string; name: string } };
+            likes?: string[];
+
+        } | null;
 
     if (!note) return notFound();
 
@@ -82,7 +91,7 @@ export default async function NotePage(props: Params) {
         if (payload) {
             currentUserId = payload.userId;
             if (note.likes && Array.isArray(note.likes)) {
-                isLiked = note.likes.some((id: any) => id.toString() === currentUserId);
+                isLiked = note.likes.some((id: unknown) => id?.toString() === currentUserId);
             }
         }
     }
@@ -124,13 +133,13 @@ export default async function NotePage(props: Params) {
                 <div className="container mx-auto px-4 max-w-4xl mt-16 border-t pt-12">
                     <div className="flex items-center justify-between mb-8">
                         <h3 className="text-2xl font-bold">More in {note.subCategoryId?.name}</h3>
-                        <Link href={`/${categorySlug}/${subCategorySlug}`} className="text-primary font-medium hover:underline flex items-center">
+                        <Link href={`/${categorySlug ?? ''}/${subCategorySlug ?? ''}`} className="text-primary font-medium hover:underline flex items-center">
                             View All <ArrowLeft className="w-4 h-4 ml-2 rotate-180" />
                         </Link>
                     </div>
 
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                        {serializedRelated.map((rel: any) => (
+                        {serializedRelated.map((rel: { _id: string; slug: string; title: string; images?: string[]; createdAt: string }) => (
                             <Link key={rel._id} href={`/blog/${rel.slug}`} className="group border rounded-xl overflow-hidden hover:shadow-lg transition-all">
                                 <div className="aspect-video bg-muted relative">
                                     {rel.images?.[0] ? (

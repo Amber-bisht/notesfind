@@ -35,8 +35,21 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
         // CSV Header
         const headers = ['Name', 'Email', 'Phone', 'Job Title', 'Age', 'Country', 'District', 'Organization', 'Joined At'];
 
-        const rows = attendees.map((attendee: any) => {
-            const joinedInfo = attendee.joinedWebinars.find((jw: any) => jw.webinarId.toString() === id);
+        // Define basic interface for attendee to avoid any
+        interface Attendee {
+            name: string;
+            email: string;
+            phone?: string;
+            jobTitle?: string;
+            age?: number;
+            country?: string;
+            district?: string;
+            organization?: string;
+            joinedWebinars: { webinarId: string | { toString: () => string }; joinedAt: Date | string }[];
+        }
+
+        const rows = (attendees as unknown as Attendee[]).map((attendee) => {
+            const joinedInfo = attendee.joinedWebinars.find((jw) => jw.webinarId.toString() === id);
             const joinedAt = joinedInfo ? new Date(joinedInfo.joinedAt).toLocaleString() : 'N/A';
 
             // Handle potentially missing fields or commas in text

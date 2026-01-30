@@ -4,7 +4,7 @@ import Service from '@/models/Service';
 import { verifyToken } from '@/lib/auth';
 import { UserRole } from '@/models/User';
 
-export async function GET(_req: NextRequest) {
+export async function GET() {
     try {
         await dbConnect();
         const services = await Service.find({}).sort({ createdAt: -1 });

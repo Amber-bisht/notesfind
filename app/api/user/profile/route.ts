@@ -19,7 +19,7 @@ export async function PATCH(req: NextRequest) {
 
         await dbConnect();
 
-        const updateData: any = { socials };
+        const updateData: { socials: Record<string, string>; phone?: string } = { socials };
         if (phone) updateData.phone = phone;
 
         const user = await User.findOneAndUpdate(

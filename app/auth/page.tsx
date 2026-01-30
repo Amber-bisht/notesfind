@@ -1,13 +1,13 @@
 "use client";
 
 import { useEffect, useState } from 'react';
-import { useSearchParams } from 'next/navigation';
 import Image from 'next/image';
 
 export default function AuthPage() {
     const [mounted, setMounted] = useState(false);
 
     useEffect(() => {
+        // eslint-disable-next-line react-hooks/set-state-in-effect
         setMounted(true);
     }, []);
 

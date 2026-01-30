@@ -2,7 +2,11 @@ import { NextRequest, NextResponse } from 'next/server';
 import dbConnect from '@/lib/db';
 import Request from '@/models/Request';
 import User from '@/models/User';
-import jwt from 'jsonwebtoken';
+import jwt, { JwtPayload } from 'jsonwebtoken';
+
+interface DecodedToken extends JwtPayload {
+    userId: string;
+}
 
 // Helper to verify admin/publisher access
 async function verifyAdminOrPublisher(req: NextRequest) {
@@ -10,11 +14,11 @@ async function verifyAdminOrPublisher(req: NextRequest) {
     if (!token) return false;
 
     try {
-        const decoded: any = jwt.verify(token, process.env.JWT_SECRET!);
+        const decoded = jwt.verify(token, process.env.JWT_SECRET!) as DecodedToken;
         await dbConnect();
         const user = await User.findById(decoded.userId);
         return user && ['admin', 'publisher'].includes(user.role);
-    } catch (error) {
+    } catch {
         return false;
     }
 }
@@ -56,9 +60,9 @@ export async function POST(req: NextRequest) {
 
         let user;
         try {
-            const decoded: any = jwt.verify(token, process.env.JWT_SECRET!);
+            const decoded = jwt.verify(token, process.env.JWT_SECRET!) as DecodedToken;
             user = await User.findById(decoded.userId);
-        } catch (err) {
+        } catch {
             return NextResponse.json(
                 { success: false, error: 'Invalid token. Please log in again.' },
                 { status: 401 }
@@ -104,9 +108,9 @@ export async function POST(req: NextRequest) {
         });
 
         return NextResponse.json({ success: true, data: request }, { status: 201 });
-    } catch (error: any) {
+    } catch (error) {
         return NextResponse.json(
-            { success: false, error: error.message || 'Server Error' },
+            { success: false, error: (error as Error).message || 'Server Error' },
             { status: 500 }
         );
     }
@@ -127,9 +131,9 @@ export async function GET(req: NextRequest) {
         const requests = await Request.find({}).sort({ createdAt: -1 });
 
         return NextResponse.json({ success: true, count: requests.length, requests });
-    } catch (error: any) {
+    } catch (error) {
         return NextResponse.json(
-            { success: false, error: error.message || 'Server Error' },
+            { success: false, error: (error as Error).message || 'Server Error' },
             { status: 500 }
         );
     }

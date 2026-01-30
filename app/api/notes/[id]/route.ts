@@ -14,7 +14,7 @@ export async function GET(req: NextRequest, props: { params: Promise<{ id: strin
             return NextResponse.json({ error: 'Note not found' }, { status: 404 });
         }
         return NextResponse.json({ note });
-    } catch (error) {
+    } catch {
         return NextResponse.json({ error: 'Failed to fetch note' }, { status: 500 });
     }
 }
@@ -45,8 +45,8 @@ export async function DELETE(req: NextRequest, props: { params: Promise<{ id: st
 
         revalidatePath('/', 'layout');
         return NextResponse.json({ success: true });
-    } catch (error: any) {
-        return NextResponse.json({ error: error.message }, { status: 500 });
+    } catch (error) {
+        return NextResponse.json({ error: (error as Error).message }, { status: 500 });
     }
 }
 
@@ -81,10 +81,10 @@ export async function PUT(req: NextRequest, props: { params: Promise<{ id: strin
 
         revalidatePath('/', 'layout');
         return NextResponse.json({ note: updatedNote });
-    } catch (error: any) {
-        if (error.code === 11000) {
+    } catch (error) {
+        if ((error as { code?: number }).code === 11000) {
             return NextResponse.json({ error: 'Note slug or rank already exists in this sub-category' }, { status: 400 });
         }
-        return NextResponse.json({ error: error.message }, { status: 400 });
+        return NextResponse.json({ error: (error as Error).message }, { status: 400 });
     }
 }

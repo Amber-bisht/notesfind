@@ -6,7 +6,7 @@ import Turnstile from "react-turnstile";
 import { useRouter } from "next/navigation";
 
 export default function ContactPage() {
-    const [user, setUser] = useState<any>(null);
+    const [user, setUser] = useState<{ name: string; email: string } | null>(null);
     const [loading, setLoading] = useState(true);
     const [submitting, setSubmitting] = useState(false);
     const [error, setError] = useState("");
@@ -31,6 +31,7 @@ export default function ContactPage() {
                     router.push('/auth?redirect=/contact');
                 }
             } catch (err) {
+                console.error("Verification error:", err);
                 setError("Failed to verify identity.");
             } finally {
                 setLoading(false);
@@ -73,6 +74,7 @@ export default function ContactPage() {
                 setError(data.error || "Failed to submit.");
             }
         } catch (err) {
+            console.error("Submission error:", err);
             setError("An unexpected error occurred.");
         } finally {
             setSubmitting(false);
@@ -98,7 +100,7 @@ export default function ContactPage() {
                     </div>
                     <h1 className="text-2xl font-bold">Message Sent!</h1>
                     <p className="text-muted-foreground">
-                        Thanks for reaching out, {user.name}. We'll get back to you at {user.email} as soon as possible.
+                        Thanks for reaching out, {user.name}. We&apos;ll get back to you at {user.email} as soon as possible.
                     </p>
                     <button
                         onClick={() => setSuccess(false)}

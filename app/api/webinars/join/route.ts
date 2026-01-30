@@ -24,7 +24,15 @@ export async function POST(req: NextRequest) {
             return NextResponse.json({ success: false, error: 'Webinar ID is required' }, { status: 400 });
         }
 
-        const updateData: any = { // eslint-disable-line @typescript-eslint/no-explicit-any
+        const updateData: {
+            $addToSet: {
+                joinedWebinars: {
+                    webinarId: string;
+                    joinedAt: Date;
+                }
+            };
+            $set?: Record<string, string | number>;
+        } = {
             $addToSet: {
                 joinedWebinars: {
                     webinarId,
@@ -33,7 +41,7 @@ export async function POST(req: NextRequest) {
             }
         };
 
-        const setFields: any = {};
+        const setFields: Record<string, string | number> = {};
         if (phone) setFields.phone = phone;
         if (jobTitle) setFields.jobTitle = jobTitle;
         if (age) setFields.age = age;

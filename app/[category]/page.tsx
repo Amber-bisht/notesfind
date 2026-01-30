@@ -15,11 +15,11 @@ export async function generateStaticParams() {
     try {
         await dbConnect();
         const categories = await Category.find({}, 'slug').lean();
-        return categories.map((c: any) => ({
+        return categories.map((c: { slug: string }) => ({
             category: c.slug,
         }));
     } catch (e) {
-        console.warn('DB connection failed during SSG for categories, skipping static generation');
+        console.warn('DB connection failed during SSG for categories, skipping static generation', e);
         return [];
     }
 }
@@ -27,7 +27,7 @@ export async function generateStaticParams() {
 export async function generateMetadata(props: Params) {
     const params = await props.params;
     await dbConnect();
-    const category = await Category.findOne({ slug: params.category }).lean() as any;
+    const category = await Category.findOne({ slug: params.category }).lean() as { name: string; description?: string; _id: string } | null;
     if (!category) return { title: 'Not Found' };
 
     return {
@@ -40,10 +40,16 @@ export default async function CategoryPage(props: Params) {
     const params = await props.params;
     await dbConnect();
 
-    const category = await Category.findOne({ slug: params.category }).lean() as any;
+    const category = await Category.findOne({ slug: params.category }).lean() as { name: string; description?: string; slug: string; _id: string } | null;
     if (!category) return notFound();
 
-    const subCategories = await SubCategory.find({ categoryId: category._id }).sort({ name: 1 }).lean();
+    const subCategories = await SubCategory.find({ categoryId: category._id }).sort({ name: 1 }).lean() as unknown as {
+        _id: string;
+        slug: string;
+        image?: string;
+        name: string;
+        description?: string;
+    }[];
 
     return (
         <div className="space-y-8">
@@ -54,7 +60,7 @@ export default async function CategoryPage(props: Params) {
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {subCategories.map((sub: any) => (
+                {subCategories.map((sub) => (
                     <Link key={sub._id} href={`/${category.slug}/${sub.slug}`} className="group rounded-xl border bg-card text-card-foreground shadow transition-all hover:shadow-lg hover:-translate-y-1 block overflow-hidden h-full flex flex-col">
                         <div className="relative aspect-video w-full overflow-hidden bg-muted">
                             {sub.image ? (

@@ -11,8 +11,8 @@ import { NotePDFButton } from "./NotePDFButton";
 interface NoteViewerProps {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     note: any;
-    categorySlug: string;
-    subCategorySlug: string;
+    categorySlug?: string;
+    subCategorySlug?: string;
     currentUser?: string | null;
     initialIsLiked?: boolean;
 }
@@ -83,9 +83,15 @@ export function NoteViewer({ note, categorySlug, subCategorySlug, currentUser, i
     return (
         <div className="max-w-4xl mx-auto pb-20">
             <div className="flex justify-between items-start mb-8">
-                <Link href={`/${categorySlug}/${subCategorySlug}`} className="inline-flex items-center text-sm text-muted-foreground hover:text-primary transition-colors">
-                    <ArrowLeft className="w-4 h-4 mr-2" /> Back to {note.subCategoryId?.name}
-                </Link>
+                {categorySlug && subCategorySlug ? (
+                    <Link href={`/${categorySlug}/${subCategorySlug}`} className="inline-flex items-center text-sm text-muted-foreground hover:text-primary transition-colors">
+                        <ArrowLeft className="w-4 h-4 mr-2" /> Back to {note.subCategoryId?.name || 'Topic'}
+                    </Link>
+                ) : (
+                    <Link href="/" className="inline-flex items-center text-sm text-muted-foreground hover:text-primary transition-colors">
+                        <ArrowLeft className="w-4 h-4 mr-2" /> Back to Home
+                    </Link>
+                )}
 
                 <NotePDFButton contentRef={contentRef} noteTitle={note.title} noteId={note._id} noteSlug={note.slug} />
             </div>

@@ -6,11 +6,58 @@ import { NoteForm } from "@/components/NoteForm";
 import Link from "next/link";
 import Image from "next/image";
 
+// Define interfaces matching API response (where dates are strings)
+interface DashboardNote {
+    _id: string;
+    title: string;
+    slug: string;
+    content: string;
+    subCategoryId?: { name: string };
+    authorId?: { name: string; email: string; image?: string };
+    images: string[];
+    createdAt: string;
+}
+
+interface DashboardUser {
+    name: string;
+    email: string;
+    role: string;
+    phone?: string;
+    downloads: {
+        noteId: DashboardNote | null; // Populated note or null if deleted
+        downloadedAt: string;
+    }[];
+    socials: {
+        github?: string;
+        twitter?: string;
+        linkedin?: string;
+        leetcode?: string;
+        codeforces?: string;
+        website?: string;
+        [key: string]: string | undefined;
+    };
+    joinedWebinars: {
+        webinarId: {
+            _id: string;
+            title: string;
+            image?: string;
+            timestamp: string;
+            type: 'offline' | 'online';
+            venue?: string;
+            address?: string;
+            description?: string;
+            link?: string;
+            mapLink?: string;
+        } | null;
+        joinedAt: string;
+    }[];
+}
+
 export default function DashboardPage() {
-    const [user, setUser] = useState<any>(null); // eslint-disable-line @typescript-eslint/no-explicit-any
-    const [notes, setNotes] = useState<any[]>([]); // eslint-disable-line @typescript-eslint/no-explicit-any
+    const [user, setUser] = useState<DashboardUser | null>(null);
+    const [notes, setNotes] = useState<DashboardNote[]>([]);
     const [isCreating, setIsCreating] = useState(false);
-    const [editingNote, setEditingNote] = useState<any>(null); // eslint-disable-line @typescript-eslint/no-explicit-any
+    const [editingNote, setEditingNote] = useState<DashboardNote | null>(null);
     const [activeTab, setActiveTab] = useState("downloads");
     const [loading, setLoading] = useState(true);
 
@@ -37,9 +84,9 @@ export default function DashboardPage() {
                 const allNotes = data.notes || [];
 
                 if (userData.user.role === 'admin') {
-                    setNotes(allNotes);
+                    setNotes(allNotes as DashboardNote[]);
                 } else {
-                    setNotes(allNotes.filter((n: any) => n.authorId?.email === userData.user.email)); // eslint-disable-line @typescript-eslint/no-explicit-any
+                    setNotes((allNotes as DashboardNote[]).filter((n) => n.authorId?.email === userData.user.email));
                 }
                 setActiveTab("mynotes"); // Default to my notes for creators
             } else {
@@ -57,7 +104,7 @@ export default function DashboardPage() {
         setEditingNote(null);
     }
 
-    const handleEdit = (note: any) => { // eslint-disable-line @typescript-eslint/no-explicit-any
+    const handleEdit = (note: DashboardNote) => {
         setEditingNote(note);
         setIsCreating(true);
     }
@@ -196,7 +243,7 @@ export default function DashboardPage() {
                     <div className="space-y-6">
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                             {user.downloads && user.downloads.length > 0 ? (
-                                user.downloads.map((item: any, index: number) => { // eslint-disable-line @typescript-eslint/no-explicit-any
+                                user.downloads.map((item, index: number) => {
                                     const note = item.noteId;
                                     if (!note) return null; // Handle deleted notes
                                     return (
@@ -254,7 +301,7 @@ export default function DashboardPage() {
     );
 }
 
-function WebinarsTab({ user }: { user: any }) { // eslint-disable-line @typescript-eslint/no-explicit-any
+function WebinarsTab({ user }: { user: DashboardUser }) {
     const joinedWebinars = user.joinedWebinars || [];
 
     if (joinedWebinars.length === 0) {
@@ -275,7 +322,7 @@ function WebinarsTab({ user }: { user: any }) { // eslint-disable-line @typescri
         <div className="space-y-6">
             <h2 className="text-xl font-semibold">Your Scheduled Webinars</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {joinedWebinars.map((jw: any) => { // eslint-disable-line @typescript-eslint/no-explicit-any
+                {joinedWebinars.map((jw) => {
                     const webinar = jw.webinarId;
                     if (!webinar) return null;
 
@@ -348,7 +395,7 @@ function WebinarsTab({ user }: { user: any }) { // eslint-disable-line @typescri
     );
 }
 
-function ProfileForm({ initialSocials, initialPhone, onUpdate }: { initialSocials: any, initialPhone?: string, onUpdate: () => void }) { // eslint-disable-line @typescript-eslint/no-explicit-any
+function ProfileForm({ initialSocials, initialPhone, onUpdate }: { initialSocials: DashboardUser['socials'], initialPhone?: string, onUpdate: () => void }) {
     const [socials, setSocials] = useState(initialSocials || {});
     const [phone, setPhone] = useState(initialPhone || "");
     const [saving, setSaving] = useState(false);
@@ -376,7 +423,7 @@ function ProfileForm({ initialSocials, initialPhone, onUpdate }: { initialSocial
             } else {
                 setMessage("Failed to update profile.");
             }
-        } catch (error) {
+        } catch {
             setMessage("An error occurred.");
         } finally {
             setSaving(false);

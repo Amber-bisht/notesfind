@@ -10,6 +10,7 @@ async function getCategories() {
         const categories = await Category.find({}).sort({ createdAt: -1 }).lean();
         return JSON.parse(JSON.stringify(categories));
     } catch (error) {
+        console.error('Error fetching categories:', error);
         return [];
     }
 }
@@ -32,7 +33,7 @@ export default async function CategoriesPage() {
                 </div>
             ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                    {categories.map((category: any) => (
+                    {categories.map((category: { _id: string; slug: string; image?: string; name: string; description?: string }) => (
                         <Link key={category._id} href={`/${category.slug}`} className="group relative rounded-xl border bg-card text-card-foreground shadow-sm transition-all hover:shadow-xl hover:-translate-y-1 block overflow-hidden h-full flex flex-col">
                             <div className="relative aspect-video w-full overflow-hidden bg-muted">
                                 {category.image ? (

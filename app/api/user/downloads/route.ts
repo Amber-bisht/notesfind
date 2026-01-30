@@ -28,7 +28,7 @@ export async function POST(req: NextRequest) {
             return NextResponse.json({ error: "User not found" }, { status: 404 });
         }
 
-        const alreadyDownloaded = user.downloads.some((d: any) => d.noteId.toString() === noteId);
+        const alreadyDownloaded = user.downloads.some((d: { noteId: { toString: () => string } }) => d.noteId.toString() === noteId);
 
         if (!alreadyDownloaded) {
             user.downloads.push({ noteId, slug, downloadedAt: new Date() });

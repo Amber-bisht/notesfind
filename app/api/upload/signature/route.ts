@@ -36,7 +36,7 @@ export async function POST(req: NextRequest) {
             cloudName: process.env.CLOUDINARY_CLOUD_NAME,
             apiKey: process.env.CLOUDINARY_API_KEY
         });
-    } catch (error: any) {
-        return NextResponse.json({ error: error.message }, { status: 500 });
+    } catch (error) {
+        return NextResponse.json({ error: (error as Error).message }, { status: 500 });
     }
 }

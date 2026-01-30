@@ -1,5 +1,5 @@
 
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 import dbConnect from "@/lib/db";
 import Note from "@/models/Note";
 import Category from "@/models/Category";
@@ -7,7 +7,7 @@ import SubCategory from "@/models/SubCategory";
 
 dbConnect();
 
-export async function GET(request: NextRequest) {
+export async function GET() {
     try {
         const limit = 10;
 
@@ -32,7 +32,7 @@ export async function GET(request: NextRequest) {
             subCategories: trendingSubCategories
         });
 
-    } catch (error: any) {
-        return NextResponse.json({ error: error.message }, { status: 500 });
+    } catch (error) {
+        return NextResponse.json({ error: (error as Error).message }, { status: 500 });
     }
 }

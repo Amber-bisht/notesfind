@@ -9,7 +9,7 @@ export async function GET() {
     try {
         const categories = await Category.find({}).sort({ createdAt: -1 });
         return NextResponse.json({ categories });
-    } catch (error) {
+    } catch {
         return NextResponse.json({ error: 'Failed to fetch categories' }, { status: 500 });
     }
 }
@@ -33,10 +33,10 @@ export async function POST(req: NextRequest) {
 
         revalidatePath('/', 'layout'); // Purge cache
         return NextResponse.json({ category }, { status: 201 });
-    } catch (error: any) {
-        if (error.code === 11000) {
+    } catch (error) {
+        if ((error as { code?: number }).code === 11000) {
             return NextResponse.json({ error: 'Category name, slug, or rank already exists' }, { status: 400 });
         }
-        return NextResponse.json({ error: error.message }, { status: 400 });
+        return NextResponse.json({ error: (error as Error).message }, { status: 400 });
     }
 }

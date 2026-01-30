@@ -11,6 +11,25 @@ export const metadata = {
     description: "Explore our top rated, newest, and classic notes.",
 };
 
+interface PageNote {
+    _id: string;
+    title: string;
+    slug: string;
+    rank?: number;
+    createdAt: Date;
+    images: string[];
+    subCategoryId?: {
+        slug: string;
+        categoryId?: {
+            slug: string;
+        };
+    };
+    authorId?: {
+        name: string;
+        image?: string;
+    };
+}
+
 export default async function Pages() {
     await dbConnect();
 
@@ -27,8 +46,9 @@ export default async function Pages() {
     // Assuming 'rank' field is used for "top" prioritization as implemented in Note model.
     // If no rank, we can fallback to other metrics. User said "rank - 1,2,3,4 etc".
     // Let's filter notes that have a rank first.
-    const notesWithRank = allNotes.filter((n: any) => n.rank !== undefined && n.rank !== null);
-    const topNotes = notesWithRank.sort((a: any, b: any) => a.rank - b.rank).slice(0, 10);
+    // Let's filter notes that have a rank first.
+    const notesWithRank = (allNotes as unknown as PageNote[]).filter((n) => n.rank !== undefined && n.rank !== null);
+    const topNotes = notesWithRank.sort((a, b) => (a.rank || 0) - (b.rank || 0)).slice(0, 10);
 
     // If few notes have rank, maybe just take random or all?
     // Let's fallback to just taking the first 10 if rank isn't widely used yet, or mix.
@@ -36,10 +56,10 @@ export default async function Pages() {
 
     // 2. Newest Notes
     // Clone to avoid mutating if we want to reuse allNotes, but filter/map creates new arrays mostly.
-    const newestNotes = [...allNotes].sort((a: any, b: any) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()).slice(0, 10);
+    const newestNotes = [...(allNotes as unknown as PageNote[])].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()).slice(0, 10);
 
     // 3. Oldest Notes
-    const oldestNotes = [...allNotes].sort((a: any, b: any) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()).slice(0, 10);
+    const oldestNotes = [...(allNotes as unknown as PageNote[])].sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()).slice(0, 10);
 
     return (
         <div className="min-h-screen bg-background py-10 px-4 sm:px-6 lg:px-8">
@@ -87,7 +107,7 @@ export default async function Pages() {
     );
 }
 
-function NoteGrid({ notes, emptyMessage }: { notes: any[], emptyMessage: string }) {
+function NoteGrid({ notes, emptyMessage }: { notes: PageNote[], emptyMessage: string }) {
     if (notes.length === 0) {
         return <div className="text-muted-foreground italic">{emptyMessage}</div>;
     }

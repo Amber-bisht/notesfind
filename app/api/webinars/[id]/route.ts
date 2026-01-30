@@ -37,7 +37,7 @@ export async function DELETE(
         await webinar.deleteOne();
 
         return NextResponse.json({ success: true, message: 'Webinar deleted' }, { status: 200 });
-    } catch (error) {
+    } catch {
         return NextResponse.json(
             { success: false, error: 'Failed to delete webinar' },
             { status: 500 }

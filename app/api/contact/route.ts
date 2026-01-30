@@ -2,7 +2,11 @@ import { NextRequest, NextResponse } from 'next/server';
 import dbConnect from '@/lib/db';
 import Contact from '@/models/Contact';
 import User from '@/models/User';
-import jwt from 'jsonwebtoken';
+import jwt, { JwtPayload } from 'jsonwebtoken';
+
+interface DecodedToken extends JwtPayload {
+    userId: string;
+}
 
 async function verifyTurnstile(token: string) {
     const secretKey = process.env.CLOUDFLARE_SECRET_KEY;
@@ -20,7 +24,7 @@ async function verifyTurnstile(token: string) {
 
         const outcome = await result.json();
         return outcome.success;
-    } catch (e) {
+    } catch {
         return false;
     }
 }
@@ -35,9 +39,9 @@ export async function POST(req: NextRequest) {
 
         let user;
         try {
-            const decoded: any = jwt.verify(token, process.env.JWT_SECRET!);
+            const decoded = jwt.verify(token, process.env.JWT_SECRET!) as DecodedToken;
             user = await User.findById(decoded.userId);
-        } catch (err) {
+        } catch {
             return NextResponse.json({ success: false, error: 'Invalid token' }, { status: 401 });
         }
 
@@ -71,8 +75,8 @@ export async function POST(req: NextRequest) {
 
         return NextResponse.json({ success: true, data: contact }, { status: 201 });
 
-    } catch (error: any) {
-        return NextResponse.json({ success: false, error: error.message || 'Server Error' }, { status: 500 });
+    } catch (error) {
+        return NextResponse.json({ success: false, error: (error as Error).message || 'Server Error' }, { status: 500 });
     }
 }
 
@@ -82,11 +86,11 @@ async function verifyAdminOrPublisher(req: NextRequest) {
     if (!token) return false;
 
     try {
-        const decoded: any = jwt.verify(token, process.env.JWT_SECRET!);
+        const decoded = jwt.verify(token, process.env.JWT_SECRET!) as DecodedToken;
         await dbConnect();
         const user = await User.findById(decoded.userId);
         return user && ['admin', 'publisher'].includes(user.role);
-    } catch (error) {
+    } catch {
         return false;
     }
 }
@@ -106,9 +110,9 @@ export async function GET(req: NextRequest) {
         const contacts = await Contact.find({}).sort({ createdAt: -1 });
 
         return NextResponse.json({ success: true, count: contacts.length, contacts });
-    } catch (error: any) {
+    } catch (error) {
         return NextResponse.json(
-            { success: false, error: error.message || 'Server Error' },
+            { success: false, error: (error as Error).message || 'Server Error' },
             { status: 500 }
         );
     }

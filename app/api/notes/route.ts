@@ -11,13 +11,13 @@ export async function GET(req: NextRequest) {
     const authorId = searchParams.get('authorId');
 
     try {
-        const query: any = {};
+        const query: { subCategoryId?: string; authorId?: string } = {};
         if (subCategoryId) query.subCategoryId = subCategoryId;
         if (authorId) query.authorId = authorId;
 
         const notes = await Note.find(query).populate('authorId', 'name image').populate('subCategoryId', 'name slug').sort({ createdAt: -1 });
         return NextResponse.json({ notes });
-    } catch (error) {
+    } catch {
         return NextResponse.json({ error: 'Failed to fetch notes' }, { status: 500 });
     }
 }
@@ -50,10 +50,10 @@ export async function POST(req: NextRequest) {
 
         revalidatePath('/', 'layout');
         return NextResponse.json({ note }, { status: 201 });
-    } catch (error: any) {
-        if (error.code === 11000) {
+    } catch (error) {
+        if ((error as { code?: number }).code === 11000) {
             return NextResponse.json({ error: 'Note slug or rank already exists in this sub-category' }, { status: 400 });
         }
-        return NextResponse.json({ error: error.message }, { status: 400 });
+        return NextResponse.json({ error: (error as Error).message }, { status: 400 });
     }
 }

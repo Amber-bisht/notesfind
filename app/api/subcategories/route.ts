@@ -13,7 +13,7 @@ export async function GET(req: NextRequest) {
         const query = categoryId ? { categoryId } : {};
         const subCategories = await SubCategory.find(query).populate('categoryId', 'name slug').sort({ createdAt: -1 });
         return NextResponse.json({ subCategories });
-    } catch (error) {
+    } catch {
         return NextResponse.json({ error: 'Failed to fetch sub-categories' }, { status: 500 });
     }
 }
@@ -37,10 +37,10 @@ export async function POST(req: NextRequest) {
 
         revalidatePath('/', 'layout');
         return NextResponse.json({ subCategory }, { status: 201 });
-    } catch (error: any) {
-        if (error.code === 11000) {
+    } catch (error) {
+        if ((error as { code?: number }).code === 11000) {
             return NextResponse.json({ error: 'SubCategory slug or rank already exists in this category' }, { status: 400 });
         }
-        return NextResponse.json({ error: error.message }, { status: 400 });
+        return NextResponse.json({ error: (error as Error).message }, { status: 400 });
     }
 }

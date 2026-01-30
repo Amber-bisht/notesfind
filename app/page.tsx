@@ -4,9 +4,48 @@ import dbConnect from '@/lib/db';
 import Category from '@/models/Category';
 import Note from '@/models/Note';
 import SubCategory from '@/models/SubCategory'; // Ensure model is registered
-import { ArrowRight, BookOpen, Clock, ChevronRight, Instagram } from 'lucide-react';
+import { ArrowRight, BookOpen, Instagram } from 'lucide-react';
 import { RequestResourceForm } from '@/components/RequestResourceForm';
 import communityData from '@/data/community-links.json';
+
+// Define types for data fetched
+interface PageCategory {
+    _id: string;
+    name: string;
+    slug: string;
+    image?: string;
+    count?: number;
+}
+
+interface PageSubCategory {
+    _id: string;
+    name: string;
+    slug: string;
+    categoryId?: {
+        name: string;
+        slug: string;
+    };
+}
+
+interface PageNote {
+    _id: string;
+    title: string;
+    slug: string;
+    content: string;
+    images: string[];
+    createdAt: string;
+    subCategoryId?: {
+        slug: string;
+        categoryId?: {
+            name: string;
+            slug: string;
+        };
+    };
+    authorId?: {
+        name: string;
+        image?: string;
+    };
+}
 
 async function getData() {
     await dbConnect();
@@ -45,8 +84,8 @@ async function getData() {
             SubCategory.find({}).sort({ createdAt: -1 }).limit(5).populate('categoryId', 'name slug').lean()
         ]);
 
-        const categoriesWithCounts = categories.map((cat: any) => {
-            const countObj = noteCounts.find((c: any) => c._id.toString() === cat._id.toString());
+        const categoriesWithCounts = categories.map((cat) => {
+            const countObj = noteCounts.find((c: { _id: string, count: number }) => c._id.toString() === cat._id.toString());
             return {
                 ...cat,
                 count: countObj ? countObj.count : 0
@@ -54,19 +93,19 @@ async function getData() {
         });
 
         // Sort categories by count (descending)
-        categoriesWithCounts.sort((a: any, b: any) => b.count - a.count);
+        categoriesWithCounts.sort((a, b) => (b.count || 0) - (a.count || 0));
 
         // Filter out subcategories with missing categories (e.g. deleted parents)
-        const validSubCategories = subCategories.filter((sub: any) => sub.categoryId);
+        const validSubCategories = subCategories.filter((sub) => sub.categoryId);
 
         return {
-            categories: JSON.parse(JSON.stringify(categoriesWithCounts)),
-            notes: JSON.parse(JSON.stringify(notes)),
-            subCategories: JSON.parse(JSON.stringify(validSubCategories))
+            categories: JSON.parse(JSON.stringify(categoriesWithCounts)) as PageCategory[],
+            notes: JSON.parse(JSON.stringify(notes)) as PageNote[],
+            subCategories: JSON.parse(JSON.stringify(validSubCategories)) as PageSubCategory[]
         };
     } catch (error) {
         console.error("Home page data fetch error:", error);
-        return { categories: [], notes: [] };
+        return { categories: [], notes: [], subCategories: [] };
     }
 }
 
@@ -121,7 +160,7 @@ export default async function Home() {
 
                         <div className="grid grid-cols-1 gap-8">
                             {latestNotes.length > 0 ? (
-                                latestNotes.map((note: any) => (
+                                latestNotes.map((note) => (
                                     <div key={note._id} className="group grid grid-cols-1 md:grid-cols-12 gap-6 items-start">
                                         <div className="md:col-span-5 aspect-video md:aspect-[4/3] relative rounded-xl overflow-hidden bg-muted">
                                             {note.images?.[0] ? (
@@ -189,7 +228,7 @@ export default async function Home() {
 
                             {categories.length > 0 ? (
                                 <div className="flex flex-wrap gap-2">
-                                    {categories.map((category: any) => (
+                                    {categories.map((category) => (
                                         <Link
                                             key={category._id}
                                             href={`/${category.slug}`}
@@ -212,7 +251,7 @@ export default async function Home() {
                             </div>
                             <div className="space-y-4">
                                 {subCategories && subCategories.length > 0 ? (
-                                    subCategories.map((sub: any, i: number) => (
+                                    subCategories.map((sub) => (
                                         <Link key={sub._id} href={`/${sub.categoryId?.slug}/${sub.slug}`} className="flex gap-4 group cursor-pointer items-center">
                                             <div className="w-12 h-12 bg-muted rounded-lg flex-shrink-0 overflow-hidden flex items-center justify-center text-primary/40">
                                                 <BookOpen className="w-6 h-6" />
@@ -267,7 +306,7 @@ export default async function Home() {
                     </div>
 
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                        {categories.slice(0, 4).map((category: any) => (
+                        {categories.slice(0, 4).map((category) => (
                             <Link key={category._id} href={`/${category.slug}`} className="group relative rounded-xl border bg-card text-card-foreground shadow-sm hover:shadow-lg transition-all hover:-translate-y-1 overflow-hidden">
                                 <div className="aspect-[3/2] bg-muted relative overflow-hidden">
                                     {category.image ? (

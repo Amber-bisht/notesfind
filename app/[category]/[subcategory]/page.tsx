@@ -5,7 +5,7 @@ import dbConnect from '@/lib/db';
 import Category from '@/models/Category';
 import SubCategory from '@/models/SubCategory';
 import Note from '@/models/Note';
-import User from '@/models/User'; // Ensure User model is registered for population
+// Ensure User model is registered for population
 import { FileText, Eye } from 'lucide-react';
 import { ViewTracker } from '@/components/ViewTracker';
 
@@ -18,16 +18,19 @@ export async function generateStaticParams() {
         await dbConnect();
         // We need to fetch all subcategories and their parent category slug
         // Mongoose populate is easiest
-        const subCategories = await SubCategory.find({}).populate('categoryId', 'slug').lean();
+        const subCategories = await SubCategory.find({}).populate('categoryId', 'slug').lean() as unknown as {
+            categoryId: { slug: string } | null;
+            slug: string;
+        }[];
 
         return subCategories
-            .filter((sub: any) => sub.categoryId) // Ensure parent exists
-            .map((sub: any) => ({
-                category: sub.categoryId.slug,
+            .filter((sub) => sub.categoryId && sub.categoryId.slug) // Ensure parent exists and has slug
+            .map((sub) => ({
+                category: sub.categoryId!.slug,
                 subcategory: sub.slug,
             }));
     } catch (e) {
-        console.warn('DB connection failed during SSG for subcategories, skipping static generation');
+        console.warn('DB connection failed during SSG for subcategories, skipping static generation', e);
         return [];
     }
 }
@@ -35,7 +38,7 @@ export async function generateStaticParams() {
 export async function generateMetadata(props: Params) {
     const params = await props.params;
     await dbConnect();
-    const subCategory = await SubCategory.findOne({ slug: params.subcategory }).lean() as any;
+    const subCategory = await SubCategory.findOne({ slug: params.subcategory }).lean() as { name: string; _id: string } | null;
     if (!subCategory) return { title: 'Not Found' };
 
     return {
@@ -52,10 +55,22 @@ export default async function SubCategoryPage(props: Params) {
     const category = await Category.findOne({ slug: params.category }).select('_id slug name').lean();
     if (!category) return notFound();
 
-    const subCategory = await SubCategory.findOne({ slug: params.subcategory, categoryId: category._id }).lean() as any;
+    const subCategory = await SubCategory.findOne({ slug: params.subcategory, categoryId: category._id }).lean() as { name: string; _id: string } | null;
     if (!subCategory) return notFound();
 
-    const notes = await Note.find({ subCategoryId: subCategory._id, isPublished: true }).sort({ createdAt: -1 }).populate('authorId', 'name image').lean();
+    const notes = await Note.find({ subCategoryId: subCategory._id, isPublished: true })
+        .sort({ createdAt: -1 })
+        .populate('authorId', 'name image')
+        .lean() as unknown as {
+            _id: string;
+            slug: string;
+            title: string;
+            content: string;
+            images?: string[];
+            authorId?: { name: string; image?: string };
+            views?: number;
+            createdAt: string;
+        }[];
 
     return (
         <div className="space-y-8">
@@ -70,7 +85,7 @@ export default async function SubCategoryPage(props: Params) {
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {notes.map((note: any) => (
+                {notes.map((note) => (
                     <Link key={note._id} href={`/blog/${note.slug}`} className="group rounded-xl border bg-card text-card-foreground shadow transition-all hover:shadow-lg hover:-translate-y-1 block overflow-hidden h-full flex flex-col">
                         <div className="relative aspect-video w-full overflow-hidden bg-muted">
                             {note.images?.[0] ? (
