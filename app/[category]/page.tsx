@@ -4,6 +4,7 @@ import dbConnect from '@/lib/db';
 import Category from '@/models/Category';
 import SubCategory from '@/models/SubCategory';
 import { Folder } from 'lucide-react';
+import { ViewTracker } from '@/components/ViewTracker';
 
 interface Params {
     params: Promise<{ category: string }>;
@@ -45,6 +46,7 @@ export default async function CategoryPage(props: Params) {
 
     return (
         <div className="space-y-8">
+            <ViewTracker id={category._id.toString()} type="category" />
             <div className="space-y-2">
                 <h1 className="text-4xl font-bold tracking-tight">{category.name}</h1>
                 <p className="text-xl text-muted-foreground">{category.description}</p>

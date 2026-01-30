@@ -31,7 +31,7 @@ export const uploadImage = async (file: File): Promise<string> => {
         // Convert Blob/File to stream and pipe through sharp to cloudinary
         // Validating if it's a File/Blob which has .stream()
         if (typeof file.stream === 'function') {
-            // @ts-ignore
+            // @ts-expect-error - Readable.fromWeb expects a web stream types mismatch
             Readable.fromWeb(file.stream()).pipe(transform).pipe(uploadStream);
         } else {
             reject(new Error("Invalid file type"));

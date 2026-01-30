@@ -29,7 +29,13 @@ export interface IUser extends Document {
         webinarId: mongoose.Types.ObjectId;
         joinedAt: Date;
     }[];
+    likedNotes: mongoose.Types.ObjectId[];
     phone?: string;
+    jobTitle?: string;
+    age?: number;
+    country?: string;
+    district?: string;
+    organization?: string;
     createdAt: Date;
     updatedAt: Date;
 }
@@ -72,9 +78,18 @@ const UserSchema: Schema<IUser> = new Schema(
         phone: {
             type: String,
         },
+        jobTitle: String,
+        age: Number,
+        country: String,
+        district: String,
+        organization: String,
         joinedWebinars: [{
             webinarId: { type: Schema.Types.ObjectId, ref: 'Webinar' },
             joinedAt: { type: Date, default: Date.now }
+        }],
+        likedNotes: [{
+            type: Schema.Types.ObjectId,
+            ref: 'Note'
         }],
     },
     { timestamps: true }

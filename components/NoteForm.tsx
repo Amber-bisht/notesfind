@@ -1,9 +1,22 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import Image from "next/image";
 import { Upload, X } from "lucide-react";
 
+interface Category {
+    _id: string;
+    name: string;
+}
+
+interface SubCategory {
+    _id: string;
+    name: string;
+    categoryId: string | Category;
+}
+
 interface NoteFormProps {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     initialData?: any;
     onSuccess: () => void;
     onCancel: () => void;
@@ -15,11 +28,39 @@ export function NoteForm({ initialData, onSuccess, onCancel }: NoteFormProps) {
     const [content, setContent] = useState(initialData?.content || "");
     const [rank, setRank] = useState(initialData?.rank || "");
     const [subCategoryId, setSubCategoryId] = useState(initialData?.subCategoryId?._id || initialData?.subCategoryId || "");
-    const [categories, setCategories] = useState<any[]>([]);
-    const [subCategories, setSubCategories] = useState<any[]>([]);
+    const [categories, setCategories] = useState<Category[]>([]);
+    const [subCategories, setSubCategories] = useState<SubCategory[]>([]);
     const [selectedCatId, setSelectedCatId] = useState(""); // For filtering subcats
     const [images, setImages] = useState<string[]>(initialData?.images || []);
     const [uploading, setUploading] = useState(false);
+
+    const fetchCategories = async () => {
+        const res = await fetch("/api/categories");
+        const data = await res.json();
+        setCategories(data.categories || []);
+    };
+
+    const fetchSubCategories = async (catId: string) => {
+        const res = await fetch(`/api/subcategories?categoryId=${catId}`);
+        const data = await res.json();
+        setSubCategories(data.subCategories || []);
+    };
+
+    const fetchAllSubCategories = async () => {
+        const res = await fetch("/api/subcategories");
+        const data = await res.json();
+        const subs = data.subCategories || [];
+        setSubCategories(subs);
+        // Try to find the category
+        if (initialData?.subCategoryId) {
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            const sub = subs.find((s: any) => s._id === (initialData.subCategoryId._id || initialData.subCategoryId));
+            if (sub && sub.categoryId) {
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                setSelectedCatId((sub.categoryId as any)._id || sub.categoryId);
+            }
+        }
+    };
 
     useEffect(() => {
         // Fetch categories and subcategories to populate select
@@ -44,33 +85,8 @@ export function NoteForm({ initialData, onSuccess, onCancel }: NoteFormProps) {
             // Let's fetch all subcategories flat list for now to find the matching one.
             fetchAllSubCategories();
         }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [initialData]);
-
-    const fetchCategories = async () => {
-        const res = await fetch("/api/categories");
-        const data = await res.json();
-        setCategories(data.categories || []);
-    };
-
-    const fetchSubCategories = async (catId: string) => {
-        const res = await fetch(`/api/subcategories?categoryId=${catId}`);
-        const data = await res.json();
-        setSubCategories(data.subCategories || []);
-    };
-
-    const fetchAllSubCategories = async () => {
-        const res = await fetch("/api/subcategories");
-        const data = await res.json();
-        const subs = data.subCategories || [];
-        setSubCategories(subs);
-        // Try to find the category
-        if (initialData?.subCategoryId) {
-            const sub = subs.find((s: any) => s._id === (initialData.subCategoryId._id || initialData.subCategoryId));
-            if (sub && sub.categoryId) {
-                setSelectedCatId(sub.categoryId._id || sub.categoryId);
-            }
-        }
-    }
 
     const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
@@ -91,7 +107,7 @@ export function NoteForm({ initialData, onSuccess, onCancel }: NoteFormProps) {
             if (!res.ok) throw new Error(data.error);
 
             setImages([...images, data.url]);
-        } catch (error: any) {
+        } catch (error: any) { // eslint-disable-line @typescript-eslint/no-explicit-any
             console.error(error);
             alert("Upload failed: " + error.message);
         } finally {
@@ -205,7 +221,14 @@ export function NoteForm({ initialData, onSuccess, onCancel }: NoteFormProps) {
                 <div className="flex flex-wrap gap-4">
                     {images.map((img, idx) => (
                         <div key={idx} className="relative w-20 h-20 group">
-                            <img src={img} alt="Uploaded" className="w-full h-full object-cover rounded" />
+                            <Image
+                                src={img}
+                                alt="Uploaded"
+                                width={80}
+                                height={80}
+                                className="object-cover rounded"
+                                unoptimized
+                            />
                             <button
                                 type="button"
                                 onClick={() => setImages(images.filter((_, i) => i !== idx))}

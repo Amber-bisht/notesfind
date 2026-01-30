@@ -9,6 +9,8 @@ export interface INote extends Document {
     images: string[];
     isPublished: boolean;
     rank?: number;
+    views: number;
+    likes: mongoose.Types.ObjectId[]; // Array of user IDs who liked it
     createdAt: Date;
     updatedAt: Date;
 }
@@ -54,6 +56,14 @@ const NoteSchema: Schema<INote> = new Schema(
             // User said "rank - 1,2,3,4 etc -no duplicate rank"
             // Let's make it required to ensure order.
         },
+        views: {
+            type: Number,
+            default: 0,
+        },
+        likes: [{
+            type: Schema.Types.ObjectId,
+            ref: 'User',
+        }],
     },
     { timestamps: true }
 );

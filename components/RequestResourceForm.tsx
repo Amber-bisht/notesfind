@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useEffect, useState } from "react";
 import { Send, Loader2, CheckCircle } from "lucide-react";
 import Turnstile from "react-turnstile";
@@ -20,7 +21,7 @@ export function RequestResourceForm() {
                 if (res.ok) {
                     setIsAuthenticated(true);
                 }
-            } catch (err) {
+            } catch {
                 // Ignore error, treat as guest
             } finally {
                 setCheckingAuth(false);
@@ -56,7 +57,7 @@ export function RequestResourceForm() {
             } else {
                 setError(data.error || "Failed to submit request.");
             }
-        } catch (err) {
+        } catch {
             setError("Something went wrong. Please try again.");
         } finally {
             setLoading(false);
@@ -80,11 +81,11 @@ export function RequestResourceForm() {
                     <Send className="w-8 h-8 ml-1" />
                 </div>
                 <p className="text-muted-foreground mb-6 max-w-md mx-auto">
-                    Looking for specific notes? Log in to submit a request and we'll prioritize creating them for you.
+                    Looking for specific notes? Log in to submit a request and we&apos;ll prioritize creating them for you.
                 </p>
-                <a href="/auth" className="inline-flex items-center justify-center px-8 py-3 bg-primary text-primary-foreground font-bold rounded-xl hover:opacity-90 transition-opacity">
+                <Link href="/auth" className="inline-flex items-center justify-center px-8 py-3 bg-primary text-primary-foreground font-bold rounded-xl hover:opacity-90 transition-opacity">
                     Login to Request
-                </a>
+                </Link>
             </div>
         );
     }
@@ -97,7 +98,7 @@ export function RequestResourceForm() {
                 </div>
                 <h3 className="text-2xl font-bold">Request Sent!</h3>
                 <p className="text-muted-foreground">
-                    Thank you for your suggestion. We'll review it and get back to you shortly.
+                    Thank you for your suggestion. We&apos;ll review it and get back to you shortly.
                 </p>
                 <button
                     onClick={() => setSuccess(false)}
@@ -118,7 +119,7 @@ export function RequestResourceForm() {
                 <div className="text-center mb-8">
                     <h2 className="text-2xl md:text-3xl font-black tracking-tight mb-2">Request Resources</h2>
                     <p className="text-muted-foreground">
-                        Can't find what you're looking for? Let us know!
+                        Can&apos;t find what you&apos;re looking for? Let us know!
                     </p>
                 </div>
 

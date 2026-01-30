@@ -1,11 +1,12 @@
 import { notFound } from 'next/navigation';
 import dbConnect from '@/lib/db';
-import Category from '@/models/Category';
-import SubCategory from '@/models/SubCategory';
 import Note from '@/models/Note';
+import User from '@/models/User'; // Ensure User model is registered for population
 import { NoteViewer } from '@/components/NoteViewer';
 import { ArrowLeft, BookOpen, ChevronRight } from 'lucide-react';
 import Link from 'next/link';
+import { cookies } from 'next/headers';
+import { verifyToken } from '@/lib/auth';
 
 interface Params {
     params: Promise<{ slug: string }>;
@@ -69,6 +70,22 @@ export default async function NotePage(props: Params) {
     const categorySlug = note.subCategoryId?.categoryId?.slug;
     const subCategorySlug = note.subCategoryId?.slug;
 
+    // Check user like status
+    const cookieStore = await cookies();
+    const token = cookieStore.get('token')?.value;
+    let currentUserId = "";
+    let isLiked = false;
+
+    if (token) {
+        const payload = await verifyToken(token);
+        if (payload) {
+            currentUserId = payload.userId;
+            if (note.likes && Array.isArray(note.likes)) {
+                isLiked = note.likes.some((id: any) => id.toString() === currentUserId);
+            }
+        }
+    }
+
     return (
         <div className="bg-background min-h-screen pb-20">
             {/* Custom Header / Breadcrumb for Blog */}
@@ -97,6 +114,8 @@ export default async function NotePage(props: Params) {
                 note={serializedNote}
                 categorySlug={categorySlug}
                 subCategorySlug={subCategorySlug}
+                currentUser={currentUserId}
+                initialIsLiked={isLiked}
             />
 
             {/* "More in this topic" Section */}

@@ -9,7 +9,9 @@ export function CookieBanner() {
     useEffect(() => {
         const consent = localStorage.getItem("cookieConsent");
         if (!consent) {
-            setIsVisible(true);
+            // Delay to avoid synchronous state update warning in effect
+            const timer = setTimeout(() => setIsVisible(true), 500);
+            return () => clearTimeout(timer);
         }
     }, []);
 

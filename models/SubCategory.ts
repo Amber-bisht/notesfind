@@ -6,6 +6,7 @@ export interface ISubCategory extends Document {
     description?: string;
     image?: string;
     rank: number;
+    views: number;
     categoryId: mongoose.Types.ObjectId;
     createdAt: Date;
     updatedAt: Date;
@@ -33,6 +34,10 @@ const SubCategorySchema: Schema<ISubCategory> = new Schema(
         rank: {
             type: Number,
             required: [true, 'Please provide a rank'],
+        },
+        views: {
+            type: Number,
+            default: 0,
         },
         categoryId: {
             type: Schema.Types.ObjectId,

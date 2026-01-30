@@ -1,5 +1,6 @@
 import Link from "next/link";
-import { Github, Twitter, Linkedin, Facebook } from "lucide-react";
+import Image from "next/image";
+import { Github, Twitter, Linkedin } from "lucide-react";
 
 import { ThemeToggle } from "@/components/ThemeToggle";
 
@@ -11,7 +12,13 @@ export function Footer() {
                     {/* Brand */}
                     <div className="space-y-4">
                         <Link href="/" className="flex items-center gap-2">
-                            <img src="/logo-white.png" alt="NotesFind" className="h-12 w-auto invert dark:invert-0" />
+                            <Image
+                                src="/logo-white.png"
+                                alt="NotesFind"
+                                width={150}
+                                height={48}
+                                className="h-12 w-auto invert dark:invert-0"
+                            />
                             <span className="font-bold text-xl">NotesFind</span>
                         </Link>
                         <p className="text-sm text-muted-foreground">

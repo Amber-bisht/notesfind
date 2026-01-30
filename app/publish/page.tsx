@@ -2,18 +2,23 @@
 
 import { useState, useEffect } from "react";
 import { Plus, Trash2, Pencil, X } from "lucide-react";
+import Image from "next/image";
 
 import { NoteForm } from "@/components/NoteForm";
 
 export default function PublishPage() {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const [categories, setCategories] = useState<any[]>([]);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const [subCategories, setSubCategories] = useState<any[]>([]);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const [notes, setNotes] = useState<any[]>([]);
     const [activeTab, setActiveTab] = useState<"categories" | "subcategories" | "notes">("categories");
 
     // Forms
     const [editingId, setEditingId] = useState<string | null>(null);
     const [isEditingNote, setIsEditingNote] = useState(false);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const [editingNoteData, setEditingNoteData] = useState<any>(null);
 
     const [catName, setCatName] = useState("");
@@ -69,7 +74,7 @@ export default function PublishPage() {
             const data = await res.json();
             if (!res.ok) throw new Error(data.error);
             return data.url;
-        } catch (error: any) {
+        } catch (error: any) { // eslint-disable-line @typescript-eslint/no-explicit-any
             console.error(error);
             alert("Upload failed: " + error.message);
             return null;
@@ -87,6 +92,7 @@ export default function PublishPage() {
         setCatImage("");
     };
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const handleEditCategory = (cat: any) => {
         setEditingId(cat._id);
         setCatName(cat.name);
@@ -98,6 +104,7 @@ export default function PublishPage() {
 
     const handleSubmitCategory = async (e: React.FormEvent) => {
         e.preventDefault();
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const body: any = {
             name: catName,
             slug: catSlug,
@@ -144,6 +151,7 @@ export default function PublishPage() {
         setSelectedCatId("");
     };
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const handleEditSubCategory = (sub: any) => {
         setEditingId(sub._id);
         setSubName(sub.name);
@@ -245,7 +253,7 @@ export default function PublishPage() {
                             {categories.map((cat) => (
                                 <div key={cat._id} className="flex items-center justify-between p-4 border-b last:border-0">
                                     <div className="flex items-center gap-4">
-                                        {cat.image && <img src={cat.image} alt={cat.name} className="w-10 h-10 rounded object-cover" />}
+                                        {cat.image && <Image src={cat.image} alt={cat.name} width={40} height={40} className="rounded object-cover" unoptimized />}
                                         <div>
                                             <h3 className="font-medium flex items-center gap-2">
                                                 {cat.name} <span className="text-xs bg-muted px-2 py-0.5 rounded">Rank: {cat.rank}</span>
@@ -321,7 +329,7 @@ export default function PublishPage() {
                             <div>
                                 <label className="text-sm font-medium">Image</label>
                                 <div className="flex items-center gap-4 mt-2">
-                                    {catImage && <img src={catImage} alt="Preview" className="w-16 h-16 rounded object-cover" />}
+                                    {catImage && <Image src={catImage} alt="Preview" width={64} height={64} className="rounded object-cover" unoptimized />}
                                     <input
                                         type="file"
                                         onChange={async (e) => {
@@ -356,7 +364,7 @@ export default function PublishPage() {
                             {subCategories.map((sub) => (
                                 <div key={sub._id} className="flex items-center justify-between p-4 border-b last:border-0">
                                     <div className="flex items-center gap-4">
-                                        {sub.image && <img src={sub.image} alt={sub.name} className="w-10 h-10 rounded object-cover" />}
+                                        {sub.image && <Image src={sub.image} alt={sub.name} width={40} height={40} className="rounded object-cover" unoptimized />}
                                         <div>
                                             <h3 className="font-medium flex items-center gap-2">
                                                 {sub.name} <span className="text-xs bg-muted px-2 py-0.5 rounded">Rank: {sub.rank}</span>
@@ -444,7 +452,7 @@ export default function PublishPage() {
                             <div>
                                 <label className="text-sm font-medium">Image</label>
                                 <div className="flex items-center gap-4 mt-2">
-                                    {subImage && <img src={subImage} alt="Preview" className="w-16 h-16 rounded object-cover" />}
+                                    {subImage && <Image src={subImage} alt="Preview" width={64} height={64} className="rounded object-cover" unoptimized />}
                                     <input
                                         type="file"
                                         onChange={async (e) => {
@@ -486,7 +494,7 @@ export default function PublishPage() {
                                 {notes.map((note) => (
                                     <div key={note._id} className="flex items-center justify-between p-4 border-b last:border-0">
                                         <div className="flex items-center gap-4">
-                                            {note.images?.[0] && <img src={note.images[0]} alt={note.title} className="w-10 h-10 rounded object-cover" />}
+                                            {note.images?.[0] && <Image src={note.images[0]} alt={note.title} width={40} height={40} className="rounded object-cover" unoptimized />}
                                             <div>
                                                 <h3 className="font-medium flex items-center gap-2">
                                                     {note.title} <span className="text-xs bg-muted px-2 py-0.5 rounded">Rank: {note.rank}</span>

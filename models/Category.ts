@@ -6,6 +6,7 @@ export interface ICategory extends Document {
     description?: string;
     image?: string;
     rank: number;
+    views: number;
     createdAt: Date;
     updatedAt: Date;
 }
@@ -34,6 +35,10 @@ const CategorySchema: Schema<ICategory> = new Schema(
             type: Number,
             required: [true, 'Please provide a rank'],
             unique: true,
+        },
+        views: {
+            type: Number,
+            default: 0,
         },
     },
     { timestamps: true }

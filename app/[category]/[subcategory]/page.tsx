@@ -4,7 +4,9 @@ import dbConnect from '@/lib/db';
 import Category from '@/models/Category';
 import SubCategory from '@/models/SubCategory';
 import Note from '@/models/Note';
-import { FileText } from 'lucide-react';
+import User from '@/models/User'; // Ensure User model is registered for population
+import { FileText, Eye } from 'lucide-react';
+import { ViewTracker } from '@/components/ViewTracker';
 
 interface Params {
     params: Promise<{ category: string; subcategory: string }>;
@@ -56,6 +58,7 @@ export default async function SubCategoryPage(props: Params) {
 
     return (
         <div className="space-y-8">
+            <ViewTracker id={subCategory._id.toString()} type="subcategory" />
             <div className="space-y-2">
                 <div className="flex items-center text-sm text-muted-foreground space-x-2">
                     <Link href={`/${params.category}`} className="hover:text-primary transition-colors">{category.name}</Link>
@@ -94,7 +97,13 @@ export default async function SubCategoryPage(props: Params) {
                                     }
                                     <span>{note.authorId?.name || 'Anonymous'}</span>
                                 </div>
-                                <span>{new Date(note.createdAt).toLocaleDateString()}</span>
+                                <div className="flex items-center gap-3">
+                                    <div className="flex items-center gap-1">
+                                        <Eye className="w-3 h-3" />
+                                        <span>{note.views || 0}</span>
+                                    </div>
+                                    <span>{new Date(note.createdAt).toLocaleDateString()}</span>
+                                </div>
                             </div>
                         </div>
                     </Link>

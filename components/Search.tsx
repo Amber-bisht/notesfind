@@ -2,9 +2,7 @@
 
 import { useState, useEffect, useRef } from "react";
 import { Search as SearchIcon, X, Loader2 } from "lucide-react";
-import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { cn } from "@/lib/utils";
 
 interface SearchItem {
     id: string;
@@ -21,7 +19,6 @@ export function Search() {
     const [loading, setLoading] = useState(true);
     const [isOpen, setIsOpen] = useState(false);
     const containerRef = useRef<HTMLDivElement>(null);
-    const router = useRouter();
 
     useEffect(() => {
         const fetchData = async () => {
@@ -37,6 +34,7 @@ export function Search() {
                 const items: SearchItem[] = [];
 
                 if (catData.categories) {
+                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
                     catData.categories.forEach((cat: any) => {
                         items.push({
                             id: cat._id,
@@ -48,6 +46,7 @@ export function Search() {
                 }
 
                 if (subData.subCategories) {
+                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
                     subData.subCategories.forEach((sub: any) => {
                         if (sub.categoryId) {
                             items.push({
@@ -169,7 +168,7 @@ export function Search() {
                         </div>
                     ) : (
                         <div className="p-4 text-center text-sm text-muted-foreground">
-                            No results found for "{query}"
+                            No results found for &quot;{query}&quot;
                         </div>
                     )}
                 </div>

@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Loader2, Mail, MessageSquare, AlertCircle, Link as LinkIcon, Lock } from "lucide-react";
+import { Loader2, Mail, MessageSquare, AlertCircle, Link as LinkIcon } from "lucide-react";
 import { format } from "date-fns";
 import { useRouter } from "next/navigation";
 
@@ -34,7 +34,7 @@ export default function AdminContactPage() {
                 }
                 const data = await res.json();
                 setMessages(data.contacts);
-            } catch (err) {
+            } catch {
                 setError("Failed to load messages.");
             } finally {
                 setLoading(false);
@@ -85,9 +85,9 @@ export default function AdminContactPage() {
                                     <div className="flex items-center gap-2 mb-1">
                                         <h3 className="text-lg font-bold">{msg.name}</h3>
                                         <span className={`text-xs px-2 py-0.5 rounded-full border ${msg.tag === 'Bug' ? 'bg-red-50 text-red-600 border-red-200' :
-                                                msg.tag === 'Copyright' ? 'bg-orange-50 text-orange-600 border-orange-200' :
-                                                    msg.tag === 'Feedback' ? 'bg-blue-50 text-blue-600 border-blue-200' :
-                                                        'bg-gray-50 text-gray-600 border-gray-200'
+                                            msg.tag === 'Copyright' ? 'bg-orange-50 text-orange-600 border-orange-200' :
+                                                msg.tag === 'Feedback' ? 'bg-blue-50 text-blue-600 border-blue-200' :
+                                                    'bg-gray-50 text-gray-600 border-gray-200'
                                             }`}>
                                             {msg.tag}
                                         </span>

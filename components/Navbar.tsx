@@ -1,13 +1,14 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { useEffect, useState } from "react";
 import { Menu, X } from "lucide-react";
-import { useTheme } from "next-themes";
 import { Search } from "./Search";
 import { Nunito } from "next/font/google";
+import { ThemeToggle } from "./ThemeToggle";
 
 const nunito = Nunito({ subsets: ["latin"], weight: ["900"] });
 
@@ -15,11 +16,8 @@ export function Navbar() {
     const [isOpen, setIsOpen] = useState(false);
     const pathname = usePathname();
     const [user, setUser] = useState<any>(null); // eslint-disable-line @typescript-eslint/no-explicit-any
-    const { theme, resolvedTheme } = useTheme();
-    const [mounted, setMounted] = useState(false);
 
     useEffect(() => {
-        setMounted(true); // eslint-disable-line react-hooks/set-state-in-effect
         fetch('/api/auth/me')
             .then(res => res.json())
             .then(data => setUser(data.user));
@@ -27,7 +25,7 @@ export function Navbar() {
 
     // Use CSS filters for logo color
     // Logo is now a proper image, remove filters that turn it into a black box
-    const logoClass = "h-24 w-auto object-contain";
+    const logoClass = "h-24 w-auto object-contain invert dark:invert-0";
 
     const navLinks = [
         { href: "/", label: "HOME" },
@@ -69,12 +67,18 @@ export function Navbar() {
     }
 
     return (
-        <nav className="bg-black border-b-0 sticky top-0 z-50">
+        <nav className="bg-background border-b sticky top-0 z-50 transition-colors duration-300">
             <div className="container mx-auto px-4 h-24 flex items-center justify-between">
                 {/* Logo & Title */}
                 <Link href="/" className="flex items-center gap-3 hover:opacity-80 transition-opacity">
-                    <img src="/logo-white.png" alt="NotesFind" className={logoClass} />
-                    <span className={`text-3xl font-black tracking-tighter hidden lg:block text-white ${nunito.className}`}>NotesFind</span>
+                    <Image
+                        src="/logo-white.png"
+                        alt="NotesFind"
+                        width={200}
+                        height={96}
+                        className={logoClass}
+                    />
+                    <span className={`text-3xl font-black tracking-tighter hidden lg:block text-foreground ${nunito.className}`}>NotesFind</span>
                 </Link>
 
                 {/* Search Bar */}
@@ -91,8 +95,8 @@ export function Navbar() {
                             className={cn(
                                 "text-sm font-bold transition-colors hover:text-primary tracking-wide whitespace-nowrap",
                                 pathname === link.href || (pathname === '/' && link.href === '/')
-                                    ? "text-white"
-                                    : "text-gray-400"
+                                    ? "text-foreground"
+                                    : "text-muted-foreground"
                             )}
                         >
                             {link.label}
@@ -100,10 +104,17 @@ export function Navbar() {
                     ))}
 
                     <div className="flex items-center gap-4 ml-4">
+                        <ThemeToggle />
                         {user ? (
                             <Link href="/dashboard" className="flex items-center gap-2">
                                 {user.image ? (
-                                    <img src={user.image} alt={user.name} className="w-10 h-10 rounded-full border" />
+                                    <Image
+                                        src={user.image}
+                                        alt={user.name}
+                                        width={40}
+                                        height={40}
+                                        className="w-10 h-10 rounded-full border"
+                                    />
                                 ) : (
                                     <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold">
                                         {user.name?.[0]?.toUpperCase() || "U"}
@@ -111,7 +122,7 @@ export function Navbar() {
                                 )}
                             </Link>
                         ) : (
-                            <Link href="/auth" className="text-base font-medium text-gray-300 hover:text-white">
+                            <Link href="/auth" className="text-base font-medium text-muted-foreground hover:text-foreground">
                                 Login
                             </Link>
                         )}
@@ -120,7 +131,8 @@ export function Navbar() {
 
                 {/* Mobile Nav Toggle */}
                 <div className="md:hidden flex items-center gap-4">
-                    <button onClick={() => setIsOpen(!isOpen)} className="p-2 text-white">
+                    <ThemeToggle />
+                    <button onClick={() => setIsOpen(!isOpen)} className="p-2 text-foreground">
                         {isOpen ? <X className="h-8 w-8" /> : <Menu className="h-8 w-8" />}
                     </button>
                 </div>
@@ -128,19 +140,19 @@ export function Navbar() {
 
             {/* Mobile Menu */}
             {isOpen && (
-                <div className="md:hidden border-t border-gray-800 p-4 space-y-4 bg-black fixed inset-x-0 top-24 bottom-0 overflow-y-auto z-40">
+                <div className="md:hidden border-t border-border p-4 space-y-4 bg-background fixed inset-x-0 top-24 bottom-0 overflow-y-auto z-40">
                     {currentLinks.map((link) => (
                         <Link
                             key={link.label}
                             href={link.href}
                             onClick={() => setIsOpen(false)}
-                            className="block text-lg font-bold py-2 text-white hover:text-primary"
+                            className="block text-lg font-bold py-2 text-foreground hover:text-primary"
                         >
                             {link.label}
                         </Link>
                     ))}
                     {!user && (
-                        <Link href="/auth" onClick={() => setIsOpen(false)} className="block text-lg font-bold py-2 text-white hover:text-primary">
+                        <Link href="/auth" onClick={() => setIsOpen(false)} className="block text-lg font-bold py-2 text-foreground hover:text-primary">
                             Login
                         </Link>
                     )}

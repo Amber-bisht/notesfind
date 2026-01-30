@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { CheckCircle2 } from "lucide-react";
+import Image from "next/image";
 
 interface Service {
     _id: string;
@@ -48,10 +49,12 @@ export default function ServicesPage() {
                         {/* Image Header */}
                         <div className="aspect-[4/3] bg-muted relative overflow-hidden">
                             {service.image ? (
-                                <img
+                                <Image
                                     src={service.image}
                                     alt={service.title}
-                                    className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                                    fill
+                                    className="object-cover transition-transform duration-700 group-hover:scale-105"
+                                    unoptimized
                                 />
                             ) : (
                                 <div className="flex items-center justify-center h-full bg-primary/5 text-primary text-lg font-bold">

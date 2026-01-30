@@ -1,9 +1,10 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { Calendar, User as UserIcon, MapPin, Globe, ArrowLeft, Share2 } from "lucide-react";
+import { useState, useEffect, useCallback } from "react";
+import { Calendar, MapPin, Globe, ArrowLeft } from "lucide-react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import Image from "next/image";
 
 interface Webinar {
     _id: string;
@@ -25,26 +26,25 @@ interface Webinar {
 export default function WebinarDetailPage({ params }: { params: Promise<{ id: string }> }) {
     const [webinar, setWebinar] = useState<Webinar | null>(null);
     const [loading, setLoading] = useState(true);
-    const [user, setUser] = useState<any>(null); // eslint-disable-line @typescript-eslint/no-explicit-any
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const [user, setUser] = useState<any>(null);
     const [isJoined, setIsJoined] = useState(false);
 
     // Join Modal State
     const [joinModalOpen, setJoinModalOpen] = useState(false);
-    const [phoneNumber, setPhoneNumber] = useState("");
+    const [formData, setFormData] = useState({
+        phone: "",
+        jobTitle: "",
+        age: "",
+        country: "",
+        district: "",
+        organization: ""
+    });
     const [joining, setJoining] = useState(false);
 
     const router = useRouter();
 
-    useEffect(() => {
-        const init = async () => {
-            const resolvedParams = await params;
-            await fetchUser();
-            fetchWebinar(resolvedParams.id);
-        };
-        init();
-    }, [params]);
-
-    const fetchUser = async () => {
+    const fetchUser = useCallback(async () => {
         try {
             const res = await fetch('/api/auth/me');
             const data = await res.json();
@@ -54,54 +54,47 @@ export default function WebinarDetailPage({ params }: { params: Promise<{ id: st
         } catch (error) {
             console.error("Failed to fetch user:", error);
         }
-    }
+    }, []);
 
-    const fetchWebinar = async (id: string) => {
+    const checkIfJoined = useCallback((webinar: Webinar, currentUser: any) => { // eslint-disable-line @typescript-eslint/no-explicit-any
+        if (!currentUser || !webinar) return;
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const joined = currentUser.joinedWebinars?.some((jw: any) => jw.webinarId?._id === webinar._id || jw.webinarId === webinar._id);
+        setIsJoined(!!joined);
+    }, []);
+
+    const fetchWebinar = useCallback(async (id: string) => {
         try {
-            // Re-using the get-all API and filtering client-side for now, or assume we might need a specific get-one API. 
-            // The task.md said "Ensure GET /api/webinars/[id] returns all fields", but I haven't explicitly checked/created that route yet.
-            // Let's check if the generic route works or if I need to use the specific ID route.
-            // Wait, existing code has simple GET /api/webinars. 
-            // Usually there is a GET /api/webinars/[id] for DELETE. I should modify/check that or use it for GET as well.
-            // For now, let's assume I can fetch all and find, OR better, I should implement GET generic if not exists.
-            // ACTUALLY, usually standard is GET /api/webinars returning list.
-            // Let's try fetching the list and finding it for now to save a route creation if lazy, BUT
-            // The task said "Ensure GET /api/webinars/[id] returns all fields". 
-            // Ah, I missed verifying if GET /api/webinars/[id] is implemented for GET.
-            // Checking file logs... `app/api/webinars/[id]/route.ts` was ONLY checking DELETE permissions. 
-            // I should probable update that route to support GET strictly speaking.
-            // However, to unblock, I will fetch all and filter. It's safer for now without touching more backend.
-
             const res = await fetch("/api/webinars");
             const data = await res.json();
             const found = data.webinars?.find((w: Webinar) => w._id === id);
 
             if (found) {
                 setWebinar(found);
-                checkIfJoined(found, user);
-            } else {
-                // If not found in list (maybe pagination later?), try specific ID endpoint if I implement it. 
-                // For now just error.
+                // We will check joined status in another effect when user is also loaded
             }
         } catch (error) {
             console.error("Failed to fetch webinar", error);
         } finally {
             setLoading(false);
         }
-    };
+    }, []);
+
+    useEffect(() => {
+        const init = async () => {
+            const resolvedParams = await params;
+            await fetchUser();
+            fetchWebinar(resolvedParams.id);
+        };
+        init();
+    }, [params, fetchUser, fetchWebinar]);
 
     // We need to re-check joined status once user AND webinar are loaded
     useEffect(() => {
         if (user && webinar) {
             checkIfJoined(webinar, user);
         }
-    }, [user, webinar]);
-
-    const checkIfJoined = (webinar: Webinar, currentUser: any) => { // eslint-disable-line @typescript-eslint/no-explicit-any
-        if (!currentUser || !webinar) return;
-        const joined = currentUser.joinedWebinars?.some((jw: any) => jw.webinarId?._id === webinar._id || jw.webinarId === webinar._id); // eslint-disable-line @typescript-eslint/no-explicit-any
-        setIsJoined(!!joined);
-    }
+    }, [user, webinar, checkIfJoined]);
 
     const handleJoinClick = () => {
         if (!user) {
@@ -114,27 +107,39 @@ export default function WebinarDetailPage({ params }: { params: Promise<{ id: st
             return;
         }
 
-        if (user.phone) {
-            joinWebinar(webinar!._id, user.phone);
+        // Check if user has all required fields
+        const missingFields = [];
+        if (!user.phone) missingFields.push('phone');
+        if (!user.jobTitle) missingFields.push('jobTitle');
+        if (!user.age) missingFields.push('age');
+        if (!user.country) missingFields.push('country');
+        if (!user.district) missingFields.push('district');
+        if (!user.organization) missingFields.push('organization');
+
+        if (missingFields.length === 0) {
+            // User has all fields, just join
+            joinWebinar(webinar!._id, {});
         } else {
+            // Open modal to fill missing fields
             setJoinModalOpen(true);
         }
     };
 
-    const joinWebinar = async (webinarId: string, phone: string) => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const joinWebinar = async (webinarId: string, additionalData: any) => {
         setJoining(true);
         try {
             const res = await fetch('/api/webinars/join', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ webinarId, phone })
+                body: JSON.stringify({ webinarId, ...additionalData })
             });
 
             if (res.ok) {
                 setJoinModalOpen(false);
                 setIsJoined(true);
                 alert("Successfully registered! detailed info is now available in your dashboard.");
-                // Optionally refresh user
+                // Refresh user to get updated fields
                 fetchUser();
             } else {
                 const data = await res.json();
@@ -148,10 +153,15 @@ export default function WebinarDetailPage({ params }: { params: Promise<{ id: st
         }
     };
 
+    const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const { name, value } = e.target;
+        setFormData(prev => ({ ...prev, [name]: value }));
+    };
+
     const handleModalSubmit = (e: React.FormEvent) => {
         e.preventDefault();
         if (webinar) {
-            joinWebinar(webinar._id, phoneNumber);
+            joinWebinar(webinar._id, formData);
         }
     }
 
@@ -164,10 +174,12 @@ export default function WebinarDetailPage({ params }: { params: Promise<{ id: st
         <div className="min-h-screen bg-background pb-20">
             {/* Hero Section */}
             <div className="relative h-[400px] md:h-[500px] w-full bg-muted">
-                <img
+                <Image
                     src={webinar.image}
                     alt={webinar.title}
-                    className="w-full h-full object-cover"
+                    fill
+                    className="object-cover"
+                    unoptimized
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-background via-background/20 to-transparent" />
                 <div className="absolute top-6 left-6 md:left-12">
@@ -281,34 +293,108 @@ export default function WebinarDetailPage({ params }: { params: Promise<{ id: st
             {joinModalOpen && (
                 <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
                     <div className="bg-background rounded-2xl p-8 max-w-md w-full shadow-2xl border">
-                        <h3 className="text-2xl font-bold mb-2">Complete Registration</h3>
-                        <p className="text-muted-foreground mb-6">Enter your phone number to receive event updates and confirmation.</p>
-                        <form onSubmit={handleModalSubmit} className="space-y-6">
-                            <div>
-                                <label className="text-sm font-medium block mb-2">Phone Number</label>
-                                <input
-                                    type="tel"
-                                    value={phoneNumber}
-                                    onChange={(e) => setPhoneNumber(e.target.value)}
-                                    className="flex h-12 w-full rounded-lg border border-input bg-background px-4 text-base focus:ring-2 focus:ring-primary focus:border-primary transition-all outline-none"
-                                    placeholder="+1 234 567 8900"
-                                    required
-                                />
-                            </div>
-                            <div className="flex gap-3 justify-end pt-2">
+                        <h3 className="text-2xl font-bold mb-2">Complete Profile to Join</h3>
+                        <p className="text-muted-foreground mb-6">Please provide a few details to complete your registration.</p>
+                        <form onSubmit={handleModalSubmit} className="space-y-4">
+                            {!user?.phone && (
+                                <div>
+                                    <label className="text-xs font-bold uppercase text-muted-foreground block mb-1">Phone Number</label>
+                                    <input
+                                        type="tel"
+                                        name="phone"
+                                        value={formData.phone}
+                                        onChange={handleInputChange}
+                                        className="flex h-10 w-full rounded-md border border-input bg-background px-3 text-sm focus:ring-2 focus:ring-primary focus:border-primary transition-all outline-none"
+                                        placeholder="+1 234 567 8900"
+                                        required
+                                    />
+                                </div>
+                            )}
+                            {!user?.jobTitle && (
+                                <div>
+                                    <label className="text-xs font-bold uppercase text-muted-foreground block mb-1">Job Title / Role</label>
+                                    <input
+                                        type="text"
+                                        name="jobTitle"
+                                        value={formData.jobTitle}
+                                        onChange={handleInputChange}
+                                        className="flex h-10 w-full rounded-md border border-input bg-background px-3 text-sm focus:ring-2 focus:ring-primary focus:border-primary transition-all outline-none"
+                                        placeholder="e.g. Student, Developer"
+                                        required
+                                    />
+                                </div>
+                            )}
+                            {!user?.age && (
+                                <div>
+                                    <label className="text-xs font-bold uppercase text-muted-foreground block mb-1">Age</label>
+                                    <input
+                                        type="number"
+                                        name="age"
+                                        value={formData.age}
+                                        onChange={handleInputChange}
+                                        className="flex h-10 w-full rounded-md border border-input bg-background px-3 text-sm focus:ring-2 focus:ring-primary focus:border-primary transition-all outline-none"
+                                        placeholder="e.g. 24"
+                                        required
+                                    />
+                                </div>
+                            )}
+                            {!user?.country && (
+                                <div className="grid grid-cols-2 gap-4">
+                                    <div>
+                                        <label className="text-xs font-bold uppercase text-muted-foreground block mb-1">Country</label>
+                                        <input
+                                            type="text"
+                                            name="country"
+                                            value={formData.country}
+                                            onChange={handleInputChange}
+                                            className="flex h-10 w-full rounded-md border border-input bg-background px-3 text-sm focus:ring-2 focus:ring-primary focus:border-primary transition-all outline-none"
+                                            placeholder="Country"
+                                            required
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="text-xs font-bold uppercase text-muted-foreground block mb-1">District/City</label>
+                                        <input
+                                            type="text"
+                                            name="district"
+                                            value={formData.district}
+                                            onChange={handleInputChange}
+                                            className="flex h-10 w-full rounded-md border border-input bg-background px-3 text-sm focus:ring-2 focus:ring-primary focus:border-primary transition-all outline-none"
+                                            placeholder="District"
+                                            required
+                                        />
+                                    </div>
+                                </div>
+                            )}
+                            {!user?.organization && (
+                                <div>
+                                    <label className="text-xs font-bold uppercase text-muted-foreground block mb-1">College / Company</label>
+                                    <input
+                                        type="text"
+                                        name="organization"
+                                        value={formData.organization}
+                                        onChange={handleInputChange}
+                                        className="flex h-10 w-full rounded-md border border-input bg-background px-3 text-sm focus:ring-2 focus:ring-primary focus:border-primary transition-all outline-none"
+                                        placeholder="Institute or Company Name"
+                                        required
+                                    />
+                                </div>
+                            )}
+
+                            <div className="flex gap-3 justify-end pt-4">
                                 <button
                                     type="button"
                                     onClick={() => setJoinModalOpen(false)}
-                                    className="px-5 py-2.5 text-sm font-semibold hover:bg-muted rounded-lg transition-colors"
+                                    className="px-4 py-2 text-sm font-semibold hover:bg-muted rounded-lg transition-colors"
                                 >
                                     Cancel
                                 </button>
                                 <button
                                     type="submit"
                                     disabled={joining}
-                                    className="px-5 py-2.5 text-sm font-bold bg-primary text-primary-foreground hover:bg-primary/90 rounded-lg transition-colors shadow-lg hover:shadow-primary/20"
+                                    className="px-6 py-2 text-sm font-bold bg-primary text-primary-foreground hover:bg-primary/90 rounded-lg transition-colors shadow-lg hover:shadow-primary/20"
                                 >
-                                    {joining ? "Registering..." : "Confirm & Join"}
+                                    {joining ? "Registering..." : "Complete & Join"}
                                 </button>
                             </div>
                         </form>

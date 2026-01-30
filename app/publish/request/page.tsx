@@ -3,7 +3,6 @@
 import { useEffect, useState } from "react";
 import { Loader2, Mail, MessageSquare, User, Clock, AlertCircle } from "lucide-react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 
 interface Request {
     _id: string;
@@ -18,7 +17,7 @@ export default function RequestPage() {
     const [requests, setRequests] = useState<Request[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState("");
-    const router = useRouter();
+
 
     useEffect(() => {
         fetchRequests();
@@ -38,7 +37,7 @@ export default function RequestPage() {
                     setError(data.error || "Failed to fetch requests");
                 }
             }
-        } catch (err) {
+        } catch {
             setError("An error occurred while fetching requests.");
         } finally {
             setLoading(false);

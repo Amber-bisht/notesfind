@@ -18,7 +18,7 @@ export async function POST(req: NextRequest) {
         await dbConnect();
 
         const body = await req.json();
-        const { webinarId, phone } = body;
+        const { webinarId, phone, jobTitle, age, country, district, organization } = body;
 
         if (!webinarId) {
             return NextResponse.json({ success: false, error: 'Webinar ID is required' }, { status: 400 });
@@ -33,8 +33,16 @@ export async function POST(req: NextRequest) {
             }
         };
 
-        if (phone) {
-            updateData.$set = { phone };
+        const setFields: any = {};
+        if (phone) setFields.phone = phone;
+        if (jobTitle) setFields.jobTitle = jobTitle;
+        if (age) setFields.age = age;
+        if (country) setFields.country = country;
+        if (district) setFields.district = district;
+        if (organization) setFields.organization = organization;
+
+        if (Object.keys(setFields).length > 0) {
+            updateData.$set = setFields;
         }
 
         await User.findOneAndUpdate(

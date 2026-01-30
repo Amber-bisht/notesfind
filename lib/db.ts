@@ -4,6 +4,9 @@ import '@/models/SubCategory';
 import '@/models/Note';
 import '@/models/Request';
 import '@/models/Contact';
+import '@/models/User';
+import '@/models/Webinar';
+import '@/models/Service';
 
 const MONGODB_URI = process.env.MONGODB_URI;
 
@@ -24,7 +27,7 @@ interface MongooseCache {
 }
 
 declare global {
-    // eslint-disable-next-line no-var
+     
     var mongoose: MongooseCache | undefined;
 }
 

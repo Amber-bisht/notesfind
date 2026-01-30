@@ -10,7 +10,7 @@ export interface JWTPayload {
     userId: string;
     email: string;
     role: string;
-    [key: string]: any;
+    [key: string]: string | number | boolean | unknown;
 }
 
 export async function signToken(payload: JWTPayload): Promise<string> {
@@ -26,7 +26,7 @@ export async function verifyToken(token: string): Promise<JWTPayload | null> {
         const secret = new TextEncoder().encode(JWT_SECRET);
         const { payload } = await jwtVerify(token, secret);
         return payload as unknown as JWTPayload;
-    } catch (error) {
+    } catch {
         return null;
     }
 }

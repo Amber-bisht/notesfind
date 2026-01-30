@@ -1,10 +1,11 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Plus, Trash2, Pencil, X, Calendar, Link as LinkIcon, Image as ImageIcon } from "lucide-react";
-import { useRouter } from "next/navigation";
+import { Plus, X, Calendar, Link as LinkIcon, Image as ImageIcon } from "lucide-react";
+import Image from "next/image";
 
 export default function WebinarsPage() {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const [webinars, setWebinars] = useState<any[]>([]);
     const [uploading, setUploading] = useState(false);
 
@@ -116,6 +117,10 @@ export default function WebinarsPage() {
         }
     };
 
+    const handleExport = (id: string) => {
+        window.open(`/api/webinars/${id}/export`, '_blank');
+    };
+
     return (
         <div className="space-y-8 p-6">
             <div className="flex items-center justify-between">
@@ -130,10 +135,13 @@ export default function WebinarsPage() {
                         {webinars.map((webinar) => (
                             <div key={webinar._id} className="p-4 border-b last:border-0 flex gap-4">
                                 {webinar.image && (
-                                    <img
+                                    <Image
                                         src={webinar.image}
                                         alt={webinar.title}
-                                        className="w-24 h-16 rounded object-cover flex-shrink-0"
+                                        width={96}
+                                        height={64}
+                                        className="rounded object-cover flex-shrink-0"
+                                        unoptimized
                                     />
                                 )}
                                 <div className="flex-1 min-w-0">
@@ -151,12 +159,20 @@ export default function WebinarsPage() {
                                     </div>
                                 </div>
                                 <div className="flex items-start">
-                                    <button
-                                        onClick={() => handleDelete(webinar._id)}
-                                        className="text-destructive hover:bg-destructive/10 p-2 rounded"
-                                    >
-                                        <Trash2 className="w-4 h-4" />
-                                    </button>
+                                    <div className="flex gap-2 mt-4 md:mt-0">
+                                        <button
+                                            onClick={() => handleExport(webinar._id)}
+                                            className="px-4 py-2 bg-green-600 text-white rounded-md text-sm font-medium hover:bg-green-700 transition-colors"
+                                        >
+                                            Export CSV
+                                        </button>
+                                        <button
+                                            onClick={() => handleDelete(webinar._id)}
+                                            className="px-4 py-2 bg-red-600 text-white rounded-md text-sm font-medium hover:bg-red-700 transition-colors"
+                                        >
+                                            Delete
+                                        </button>
+                                    </div>
                                 </div>
                             </div>
                         ))}
@@ -281,7 +297,7 @@ export default function WebinarsPage() {
                             <div className="flex items-center gap-4 mt-2">
                                 {image ? (
                                     <div className="relative">
-                                        <img src={image} alt="Preview" className="w-24 h-16 rounded object-cover" />
+                                        <Image src={image} alt="Preview" width={96} height={64} className="rounded object-cover" unoptimized />
                                         <button
                                             type="button"
                                             onClick={() => setImage("")}

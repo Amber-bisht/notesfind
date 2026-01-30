@@ -10,10 +10,15 @@ interface NotePDFButtonProps {
     noteSlug: string;
 }
 
+interface User {
+    email: string;
+    [key: string]: unknown;
+}
+
 export function NotePDFButton({ contentRef, noteTitle, noteId, noteSlug }: NotePDFButtonProps) {
-    const [user, setUser] = useState<any>(null);
+    const [user, setUser] = useState<User | null>(null);
     const [loading, setLoading] = useState(false);
-    const [html2pdf, setHtml2pdf] = useState<any>(null);
+    const [html2pdf, setHtml2pdf] = useState<any>(null); // eslint-disable-line @typescript-eslint/no-explicit-any
 
     useEffect(() => {
         // Load user

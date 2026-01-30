@@ -41,7 +41,7 @@ async function getData() {
                     }
                 }
             ]),
-            SubCategory.find({}).sort({ createdAt: -1 }).limit(5).populate('categoryId', 'name').lean()
+            SubCategory.find({}).sort({ createdAt: -1 }).limit(5).populate('categoryId', 'name slug').lean()
         ]);
 
         const categoriesWithCounts = categories.map((cat: any) => {
@@ -55,10 +55,13 @@ async function getData() {
         // Sort categories by count (descending)
         categoriesWithCounts.sort((a: any, b: any) => b.count - a.count);
 
+        // Filter out subcategories with missing categories (e.g. deleted parents)
+        const validSubCategories = subCategories.filter((sub: any) => sub.categoryId);
+
         return {
             categories: JSON.parse(JSON.stringify(categoriesWithCounts)),
             notes: JSON.parse(JSON.stringify(notes)),
-            subCategories: JSON.parse(JSON.stringify(subCategories))
+            subCategories: JSON.parse(JSON.stringify(validSubCategories))
         };
     } catch (error) {
         console.error("Home page data fetch error:", error);

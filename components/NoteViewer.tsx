@@ -1,18 +1,83 @@
+
 "use client";
 
-import { useRef } from "react";
+import { useRef, useState, useEffect } from "react";
 import Link from 'next/link';
-import { ArrowLeft, Calendar, User } from 'lucide-react';
+import { ArrowLeft, Calendar, User, Eye, ThumbsUp } from 'lucide-react';
 import { NotePDFButton } from "./NotePDFButton";
+// import { toast } from "react-hot-toast";
 
 interface NoteViewerProps {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     note: any;
     categorySlug: string;
     subCategorySlug: string;
+    currentUser?: string | null;
+    initialIsLiked?: boolean;
 }
 
-export function NoteViewer({ note, categorySlug, subCategorySlug }: NoteViewerProps) {
+export function NoteViewer({ note, categorySlug, subCategorySlug, currentUser, initialIsLiked = false }: NoteViewerProps) {
     const contentRef = useRef<HTMLDivElement>(null);
+    const [views, setViews] = useState(note.views || 0);
+    const [likes, setLikes] = useState(note.likes?.length || 0);
+    const [isLiked, setIsLiked] = useState(initialIsLiked);
+    const [isLiking, setIsLiking] = useState(false);
+
+    useEffect(() => {
+        // Increment view count
+        const incrementView = async () => {
+            try {
+                const res = await fetch('/api/notes/view', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ id: note._id }),
+                });
+                if (res.ok) {
+                    const data = await res.json();
+                    setViews(data.views);
+                }
+            } catch (error) {
+                console.error("Failed to increment view", error);
+            }
+        };
+
+        incrementView();
+    }, [note._id]);
+
+    const handleLike = async () => {
+        if (!currentUser) {
+            // toast.error("Please login to like notes");
+            alert("Please login to like notes");
+            return;
+        }
+
+        if (isLiking) return;
+        setIsLiking(true);
+
+        try {
+            const res = await fetch('/api/notes/like', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ noteId: note._id }),
+            });
+
+            if (res.ok) {
+                const data = await res.json();
+                setLikes(data.likesCount);
+                setIsLiked(data.isLiked);
+                if (data.isLiked) {
+                    // toast.success("Liked!");
+                }
+            } else {
+                // toast.error("Failed to like note");
+            }
+        } catch (error) {
+            console.error("Error liking note", error);
+            // toast.error("Something went wrong");
+        } finally {
+            setIsLiking(false);
+        }
+    };
 
     return (
         <div className="max-w-4xl mx-auto pb-20">
@@ -29,14 +94,33 @@ export function NoteViewer({ note, categorySlug, subCategorySlug }: NoteViewerPr
                 <div className="space-y-4">
                     <h1 className="text-4xl md:text-5xl font-extrabold tracking-tight leading-tight">{note.title}</h1>
 
-                    <div className="flex items-center gap-6 text-sm text-muted-foreground border-b pb-8">
-                        <div className="flex items-center gap-2">
-                            {note.authorId?.image ? <img src={note.authorId.image} className="w-8 h-8 rounded-full" alt="" /> : <User className="w-5 h-5" />}
-                            <span className="font-medium text-foreground">{note.authorId?.name}</span>
+                    <div className="flex items-center justify-between text-sm text-muted-foreground border-b pb-8">
+                        <div className="flex items-center gap-6">
+                            <div className="flex items-center gap-2">
+                                {/* eslint-disable-next-line @next/next/no-img-element */}
+                                {note.authorId?.image ? <img src={note.authorId.image} className="w-8 h-8 rounded-full" alt="" /> : <User className="w-5 h-5" />}
+                                <span className="font-medium text-foreground">{note.authorId?.name}</span>
+                            </div>
+                            <div className="flex items-center gap-2">
+                                <Calendar className="w-4 h-4" />
+                                <span>{new Date(note.createdAt).toLocaleDateString()}</span>
+                            </div>
                         </div>
-                        <div className="flex items-center gap-2">
-                            <Calendar className="w-4 h-4" />
-                            <span>{new Date(note.createdAt).toLocaleDateString()}</span>
+
+                        <div className="flex items-center gap-4">
+                            <div className="flex items-center gap-1.5" title={`${views} views`}>
+                                <Eye className="w-4 h-4" />
+                                <span>{views}</span>
+                            </div>
+                            <button
+                                onClick={handleLike}
+                                disabled={isLiking}
+                                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full transition-colors ${isLiked ? 'bg-primary/10 text-primary' : 'hover:bg-muted'}`}
+                                title={currentUser ? (isLiked ? "Unlike" : "Like") : "Login to like"}
+                            >
+                                <ThumbsUp className={`w-4 h-4 ${isLiked ? 'fill-current' : ''}`} />
+                                <span>{likes}</span>
+                            </button>
                         </div>
                     </div>
                 </div>
@@ -51,6 +135,7 @@ export function NoteViewer({ note, categorySlug, subCategorySlug }: NoteViewerPr
                             {note.images.map((img: string, i: number) => (
                                 <figure key={i}>
                                     {/* Use standard img for better html2canvas compatibility than Next/Image */}
+                                    {/* eslint-disable-next-line @next/next/no-img-element */}
                                     <img src={img} alt={`Note image ${i + 1}`} className="rounded-xl border shadow-sm w-full" />
                                 </figure>
                             ))}
