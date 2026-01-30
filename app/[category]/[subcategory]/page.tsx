@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import Image from 'next/image';
 import { notFound } from 'next/navigation';
 import dbConnect from '@/lib/db';
 import Category from '@/models/Category';
@@ -73,9 +74,11 @@ export default async function SubCategoryPage(props: Params) {
                     <Link key={note._id} href={`/blog/${note.slug}`} className="group rounded-xl border bg-card text-card-foreground shadow transition-all hover:shadow-lg hover:-translate-y-1 block overflow-hidden h-full flex flex-col">
                         <div className="relative aspect-video w-full overflow-hidden bg-muted">
                             {note.images?.[0] ? (
-                                <img
+                                <Image
                                     src={note.images[0]}
                                     alt={note.title}
+                                    width={400}
+                                    height={225}
                                     className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
                                 />
                             ) : (
@@ -92,7 +95,7 @@ export default async function SubCategoryPage(props: Params) {
                             <div className="mt-auto pt-2 flex items-center justify-between text-xs text-muted-foreground">
                                 <div className="flex items-center gap-2">
                                     {note.authorId?.image ?
-                                        <img src={note.authorId.image} className="w-6 h-6 rounded-full" alt={note.authorId.name} /> :
+                                        <Image src={note.authorId.image} width={24} height={24} className="rounded-full object-cover" alt={note.authorId.name} /> :
                                         <div className="w-6 h-6 rounded-full bg-muted"></div>
                                     }
                                     <span>{note.authorId?.name || 'Anonymous'}</span>

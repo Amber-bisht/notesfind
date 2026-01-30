@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { Plus, Pencil, Trash2, Download, User, FileText, Github, Linkedin, Twitter, Globe, Code, MapPin } from "lucide-react";
 import { NoteForm } from "@/components/NoteForm";
 import Link from "next/link";
+import Image from "next/image";
 
 export default function DashboardPage() {
     const [user, setUser] = useState<any>(null); // eslint-disable-line @typescript-eslint/no-explicit-any
@@ -151,9 +152,11 @@ export default function DashboardPage() {
                                         {/* Image Section */}
                                         {note.images && note.images[0] && (
                                             <div className="aspect-video w-full bg-muted relative overflow-hidden">
-                                                <img
+                                                <Image
                                                     src={note.images[0]}
                                                     alt={note.title}
+                                                    width={400}
+                                                    height={225}
                                                     className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                                                 />
                                             </div>
@@ -200,7 +203,7 @@ export default function DashboardPage() {
                                         <div key={`${note._id}-${index}`} className="group overflow-hidden border rounded-xl bg-card hover:shadow-lg transition-all duration-300">
                                             <div className="aspect-video bg-muted relative overflow-hidden">
                                                 {note.images && note.images[0] ? (
-                                                    <img src={note.images[0]} alt={note.title} className="object-cover w-full h-full group-hover:scale-105 transition-transform duration-500" />
+                                                    <Image src={note.images[0]} alt={note.title} width={400} height={225} className="object-cover w-full h-full group-hover:scale-105 transition-transform duration-500" />
                                                 ) : (
                                                     <div className="flex items-center justify-center h-full text-muted-foreground">
                                                         <FileText className="w-12 h-12 opacity-20" />
@@ -280,7 +283,7 @@ function WebinarsTab({ user }: { user: any }) { // eslint-disable-line @typescri
                         <div key={webinar._id} className="border rounded-xl bg-card overflow-hidden hover:shadow-lg transition-all duration-300 flex flex-col group relative">
                             <div className="aspect-video bg-muted relative overflow-hidden">
                                 {webinar.image ? (
-                                    <img src={webinar.image} alt={webinar.title} className="w-full h-full object-cover" />
+                                    <Image src={webinar.image} alt={webinar.title} width={400} height={225} className="w-full h-full object-cover" />
                                 ) : (
                                     <div className="flex items-center justify-center h-full bg-primary/10 text-primary">
                                         Webinar

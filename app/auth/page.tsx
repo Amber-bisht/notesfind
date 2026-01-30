@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
+import Image from 'next/image';
 
 export default function AuthPage() {
     const [mounted, setMounted] = useState(false);
@@ -41,7 +42,7 @@ export default function AuthPage() {
                     onClick={handleGoogleLogin}
                     className="w-full flex items-center justify-center gap-3 bg-white text-gray-900 border border-gray-300 hover:bg-gray-50 font-medium py-3 px-4 rounded-lg transition-colors shadow-sm"
                 >
-                    <img src="https://www.svgrepo.com/show/475656/google-color.svg" alt="Google" className="w-5 h-5" />
+                    <Image src="https://www.svgrepo.com/show/475656/google-color.svg" alt="Google" width={20} height={20} className="w-5 h-5" />
                     Continue with Google
                 </button>
             </div>

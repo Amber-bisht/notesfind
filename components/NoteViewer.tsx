@@ -3,6 +3,7 @@
 
 import { useRef, useState, useEffect } from "react";
 import Link from 'next/link';
+import Image from 'next/image';
 import { ArrowLeft, Calendar, User, Eye, ThumbsUp } from 'lucide-react';
 import { NotePDFButton } from "./NotePDFButton";
 // import { toast } from "react-hot-toast";
@@ -97,8 +98,7 @@ export function NoteViewer({ note, categorySlug, subCategorySlug, currentUser, i
                     <div className="flex items-center justify-between text-sm text-muted-foreground border-b pb-8">
                         <div className="flex items-center gap-6">
                             <div className="flex items-center gap-2">
-                                {/* eslint-disable-next-line @next/next/no-img-element */}
-                                {note.authorId?.image ? <img src={note.authorId.image} className="w-8 h-8 rounded-full" alt="" /> : <User className="w-5 h-5" />}
+                                {note.authorId?.image ? <Image src={note.authorId.image} width={32} height={32} className="rounded-full object-cover" alt="" /> : <User className="w-5 h-5" />}
                                 <span className="font-medium text-foreground">{note.authorId?.name}</span>
                             </div>
                             <div className="flex items-center gap-2">
@@ -134,9 +134,8 @@ export function NoteViewer({ note, categorySlug, subCategorySlug, currentUser, i
                         <div className="grid gap-4 my-8">
                             {note.images.map((img: string, i: number) => (
                                 <figure key={i}>
-                                    {/* Use standard img for better html2canvas compatibility than Next/Image */}
-                                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                                    <img src={img} alt={`Note image ${i + 1}`} className="rounded-xl border shadow-sm w-full" />
+                                    {/* Use standard img for better html2canvas compatibility than Next/Image - Keeping Image here as requested but using unoptimized might help if needed */}
+                                    <Image src={img} alt={`Note image ${i + 1}`} width={800} height={600} className="rounded-xl border shadow-sm w-full h-auto" />
                                 </figure>
                             ))}
                         </div>

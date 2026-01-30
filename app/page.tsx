@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import Image from 'next/image';
 import dbConnect from '@/lib/db';
 import Category from '@/models/Category';
 import Note from '@/models/Note';
@@ -79,10 +80,12 @@ export default async function Home() {
             {/* Hero Section / Featured Article */}
             {featuredNote && (
                 <section className="relative w-full aspect-[21/9] md:aspect-[3/1] min-h-[400px] overflow-hidden group">
-                    <img
+                    <Image
                         src={featuredNote.images?.[0] || "/placeholder-hero.jpg"}
                         alt={featuredNote.title}
-                        className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                        fill
+                        className="object-cover transition-transform duration-700 group-hover:scale-105"
+                        priority
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent" />
 
@@ -122,9 +125,11 @@ export default async function Home() {
                                     <div key={note._id} className="group grid grid-cols-1 md:grid-cols-12 gap-6 items-start">
                                         <div className="md:col-span-5 aspect-video md:aspect-[4/3] relative rounded-xl overflow-hidden bg-muted">
                                             {note.images?.[0] ? (
-                                                <img
+                                                <Image
                                                     src={note.images[0]}
                                                     alt={note.title}
+                                                    width={500}
+                                                    height={300}
                                                     className="object-cover w-full h-full transition-transform duration-500 group-hover:scale-105"
                                                 />
                                             ) : (
@@ -152,7 +157,7 @@ export default async function Home() {
                                             <div className="flex items-center gap-2 text-sm font-medium pt-2">
                                                 <div className="w-6 h-6 rounded-full bg-muted overflow-hidden">
                                                     {note.authorId?.image ? (
-                                                        <img src={note.authorId.image} alt={note.authorId.name} className="w-full h-full object-cover" />
+                                                        <Image src={note.authorId.image} alt={note.authorId.name} width={32} height={32} className="w-full h-full object-cover" />
                                                     ) : (
                                                         <div className="w-full h-full bg-primary/20 flex items-center justify-center text-[10px] text-primary">
                                                             {note.authorId?.name?.[0] || 'A'}
@@ -266,7 +271,7 @@ export default async function Home() {
                             <Link key={category._id} href={`/${category.slug}`} className="group relative rounded-xl border bg-card text-card-foreground shadow-sm hover:shadow-lg transition-all hover:-translate-y-1 overflow-hidden">
                                 <div className="aspect-[3/2] bg-muted relative overflow-hidden">
                                     {category.image ? (
-                                        <img src={category.image} alt={category.name} className="object-cover w-full h-full transition-transform duration-500 group-hover:scale-105" />
+                                        <Image src={category.image} alt={category.name} width={400} height={266} className="object-cover w-full h-full transition-transform duration-500 group-hover:scale-105" />
                                     ) : (
                                         <div className="flex items-center justify-center h-full bg-primary/10 text-primary/40"><BookOpen className="w-8 h-8" /></div>
                                     )}

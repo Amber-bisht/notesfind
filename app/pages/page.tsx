@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import dbConnect from "@/lib/db";
 import Note from "@/models/Note";
 import "@/models/SubCategory"; // Register SubCategory model
@@ -106,9 +107,11 @@ function NoteGrid({ notes, emptyMessage }: { notes: any[], emptyMessage: string 
                         {/* Image Section */}
                         <div className="aspect-video w-full bg-muted relative overflow-hidden">
                             {note.images && note.images[0] ? (
-                                <img
+                                <Image
                                     src={note.images[0]}
                                     alt={note.title}
+                                    width={400}
+                                    height={225}
                                     className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                                 />
                             ) : (

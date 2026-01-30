@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import Image from 'next/image';
 import { notFound } from 'next/navigation';
 import dbConnect from '@/lib/db';
 import Category from '@/models/Category';
@@ -57,9 +58,11 @@ export default async function CategoryPage(props: Params) {
                     <Link key={sub._id} href={`/${category.slug}/${sub.slug}`} className="group rounded-xl border bg-card text-card-foreground shadow transition-all hover:shadow-lg hover:-translate-y-1 block overflow-hidden h-full flex flex-col">
                         <div className="relative aspect-video w-full overflow-hidden bg-muted">
                             {sub.image ? (
-                                <img
+                                <Image
                                     src={sub.image}
                                     alt={sub.name}
+                                    width={400}
+                                    height={225}
                                     className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
                                 />
                             ) : (

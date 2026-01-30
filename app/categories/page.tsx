@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import Image from 'next/image';
 import dbConnect from '@/lib/db';
 import Category from '@/models/Category';
 import { BookOpen, ArrowRight } from 'lucide-react';
@@ -35,9 +36,11 @@ export default async function CategoriesPage() {
                         <Link key={category._id} href={`/${category.slug}`} className="group relative rounded-xl border bg-card text-card-foreground shadow-sm transition-all hover:shadow-xl hover:-translate-y-1 block overflow-hidden h-full flex flex-col">
                             <div className="relative aspect-video w-full overflow-hidden bg-muted">
                                 {category.image ? (
-                                    <img
+                                    <Image
                                         src={category.image}
                                         alt={category.name}
+                                        width={400}
+                                        height={225}
                                         className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
                                     />
                                 ) : (

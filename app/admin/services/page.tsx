@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { Plus, Trash2, X, Image as ImageIcon, DollarSign } from "lucide-react";
+import Image from "next/image";
 
 interface Service {
     _id: string;
@@ -184,7 +185,7 @@ export default function AdminServicesPage() {
                                 <div className="flex items-center gap-4">
                                     {image && (
                                         <div className="w-32 h-20 relative rounded-md overflow-hidden border">
-                                            <img src={image} alt="Preview" className="w-full h-full object-cover" />
+                                            <Image src={image} alt="Preview" fill className="object-cover" />
                                         </div>
                                     )}
                                     <label className="flex items-center gap-2 cursor-pointer border rounded-md px-4 py-2 hover:bg-muted transition-colors">
@@ -219,7 +220,7 @@ export default function AdminServicesPage() {
                     <div key={service._id} className="border rounded-xl bg-card overflow-hidden flex flex-col group">
                         <div className="aspect-video bg-muted relative overflow-hidden">
                             {service.image ? (
-                                <img src={service.image} alt={service.title} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
+                                <Image src={service.image} alt={service.title} fill className="object-cover transition-transform duration-500 group-hover:scale-105" />
                             ) : (
                                 <div className="flex items-center justify-center h-full bg-primary/10 text-primary font-medium">
                                     No Image

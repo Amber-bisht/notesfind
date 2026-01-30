@@ -5,6 +5,7 @@ import User from '@/models/User'; // Ensure User model is registered for populat
 import { NoteViewer } from '@/components/NoteViewer';
 import { ArrowLeft, BookOpen, ChevronRight } from 'lucide-react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { cookies } from 'next/headers';
 import { verifyToken } from '@/lib/auth';
 
@@ -133,7 +134,7 @@ export default async function NotePage(props: Params) {
                             <Link key={rel._id} href={`/blog/${rel.slug}`} className="group border rounded-xl overflow-hidden hover:shadow-lg transition-all">
                                 <div className="aspect-video bg-muted relative">
                                     {rel.images?.[0] ? (
-                                        <img src={rel.images[0]} alt={rel.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                                        <Image src={rel.images[0]} alt={rel.title} width={400} height={225} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
                                     ) : (
                                         <div className="flex h-full w-full items-center justify-center bg-primary/10 text-primary/40"><BookOpen className="w-8 h-8" /></div>
                                     )}
