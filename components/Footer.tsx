@@ -4,7 +4,36 @@ import { Github, Twitter, Linkedin } from "lucide-react";
 
 import { ThemeToggle } from "@/components/ThemeToggle";
 
-export function Footer() {
+import dbConnect from "@/lib/db";
+import Category from "@/models/Category";
+
+async function getFooterCategories() {
+    try {
+        await dbConnect();
+        const slugs = ["dsa", "web-development", "machine-learning", "system-design"];
+        const categories = await Category.find({ slug: { $in: slugs } }).lean();
+
+        // Sort to match the order in slugs array
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        return categories.sort((a, b) => slugs.indexOf((a as any).slug) - slugs.indexOf((b as any).slug));
+    } catch (error) {
+        console.error("Failed to fetch footer categories:", error);
+        return [];
+    }
+}
+
+export async function Footer() {
+    const categories = await getFooterCategories();
+
+    const fallbackResources = [
+        { name: "Data Structures", slug: "dsa" },
+        { name: "Web Development", slug: "web-development" },
+        { name: "Machine Learning", slug: "machine-learning" },
+        { name: "System Design", slug: "system-design" },
+    ];
+
+    const resources = categories.length > 0 ? categories : fallbackResources;
+
     return (
         <footer className="border-t py-12 bg-background">
             <div className="container mx-auto px-4">
@@ -53,10 +82,14 @@ export function Footer() {
                     <div>
                         <h3 className="font-semibold mb-4">Resources</h3>
                         <ul className="space-y-2 text-sm text-muted-foreground">
-                            <li><Link href="/dsa" className="hover:text-foreground">Data Structures</Link></li>
-                            <li><Link href="/web-dev" className="hover:text-foreground">Web Development</Link></li>
-                            <li><Link href="/ml" className="hover:text-foreground">Machine Learning</Link></li>
-                            <li><Link href="/system-design" className="hover:text-foreground">System Design</Link></li>
+                            {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
+                            {resources.map((res: any) => (
+                                <li key={res.slug}>
+                                    <Link href={`/${res.slug}`} className="hover:text-foreground">
+                                        {res.name}
+                                    </Link>
+                                </li>
+                            ))}
                         </ul>
                     </div>
 

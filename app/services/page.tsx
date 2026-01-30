@@ -1,38 +1,19 @@
-"use client";
-
-import { useState, useEffect } from "react";
 import { CheckCircle2 } from "lucide-react";
 import Image from "next/image";
+import dbConnect from "@/lib/db";
+import Service from "@/models/Service";
 
-interface Service {
-    _id: string;
-    title: string;
-    description: string;
-    price: number;
-    image: string;
+// Re-validate every hour
+export const revalidate = 3600;
+
+async function getServices() {
+    await dbConnect();
+    const services = await Service.find({}).sort({ createdAt: -1 }).lean();
+    return JSON.parse(JSON.stringify(services));
 }
 
-export default function ServicesPage() {
-    const [services, setServices] = useState<Service[]>([]);
-    const [loading, setLoading] = useState(true);
-
-    useEffect(() => {
-        fetchServices();
-    }, []);
-
-    const fetchServices = async () => {
-        try {
-            const res = await fetch("/api/services");
-            const data = await res.json();
-            setServices(data.services || []);
-        } catch (error) {
-            console.error("Failed to fetch services", error);
-        } finally {
-            setLoading(false);
-        }
-    };
-
-    if (loading) return <div className="p-8 text-center">Loading services...</div>;
+export default async function ServicesPage() {
+    const services = await getServices();
 
     return (
         <div className="max-w-7xl mx-auto p-6 space-y-12">
@@ -44,7 +25,8 @@ export default function ServicesPage() {
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                {services.map((service) => (
+                {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
+                {services.map((service: any) => (
                     <div key={service._id} className="border rounded-2xl bg-card overflow-hidden hover:shadow-xl transition-all duration-300 flex flex-col group relative">
                         {/* Image Header */}
                         <div className="aspect-[4/3] bg-muted relative overflow-hidden">

@@ -22,6 +22,7 @@ export async function GET() {
             { name: "Data Structures", slug: "dsa", description: "Master the fundamental building blocks of software." },
             { name: "Machine Learning", slug: "machine-learning", description: "Teach computers to learn from data." },
             { name: "Web Development", slug: "web-development", description: "Build modern websites and web applications." },
+            { name: "System Design", slug: "system-design", description: "Learn to design scalable and reliable systems." },
             { name: "Cloud Computing", slug: "cloud-computing", description: "Deploy and scale applications in the cloud." },
             { name: "DevOps", slug: "devops", description: "Streamline development and operations." },
             { name: "Blockchain", slug: "blockchain", description: "Decentralized technologies and cryptocurrencies." },

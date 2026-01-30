@@ -1,46 +1,22 @@
-"use client";
-
-import { useState, useEffect } from "react";
-import { Calendar, MapPin } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
+import { Calendar, MapPin } from "lucide-react";
+import dbConnect from "@/lib/db";
+import Webinar from "@/models/Webinar";
 
-interface Webinar {
-    _id: string;
-    title: string;
-    description: string;
-    timestamp: string;
-    link: string;
-    image: string;
-    type?: 'online' | 'offline';
-    venue?: string;
-    address?: string;
-    createdBy: {
-        name: string;
-    }
+// Re-validate every hour
+export const revalidate = 3600;
+
+async function getWebinars() {
+    await dbConnect();
+    // Filter for webinars where timestamp is greater than or equal to now
+    const now = new Date();
+    const webinars = await Webinar.find({ timestamp: { $gte: now } }).sort({ timestamp: 1 }).lean();
+    return JSON.parse(JSON.stringify(webinars));
 }
 
-export default function WebinarsPage() {
-    const [webinars, setWebinars] = useState<Webinar[]>([]);
-    const [loading, setLoading] = useState(true);
-
-    useEffect(() => {
-        fetchWebinars();
-    }, []);
-
-    const fetchWebinars = async () => {
-        try {
-            const res = await fetch("/api/webinars");
-            const data = await res.json();
-            setWebinars(data.webinars || []);
-        } catch (error) {
-            console.error("Failed to fetch webinars", error);
-        } finally {
-            setLoading(false);
-        }
-    };
-
-    if (loading) return <div className="p-8 text-center">Loading upcoming webinars...</div>;
+export default async function WebinarsPage() {
+    const webinars = await getWebinars();
 
     return (
         <div className="max-w-6xl mx-auto p-6 space-y-8">
@@ -52,7 +28,8 @@ export default function WebinarsPage() {
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {webinars.map((webinar) => {
+                {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
+                {webinars.map((webinar: any) => {
                     return (
                         <div key={webinar._id} className="border rounded-xl bg-card overflow-hidden hover:shadow-xl transition-all duration-300 flex flex-col group relative">
                             <Link href={`/webinars/${webinar._id}`} className="absolute inset-0 z-10">
@@ -124,8 +101,6 @@ export default function WebinarsPage() {
                     Learn More
                 </button>
             </div>
-
-            {/* Modal removed as joining is handled on details page */}
         </div>
     );
 }
