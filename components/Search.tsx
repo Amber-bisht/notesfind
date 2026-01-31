@@ -109,7 +109,7 @@ export function Search() {
     };
 
     return (
-        <div ref={containerRef} className="relative w-full max-w-md hidden md:block">
+        <div ref={containerRef} className="relative w-full max-w-2xl hidden md:block">
             <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                     <SearchIcon className="h-4 w-4 text-muted-foreground" />
@@ -154,14 +154,15 @@ export function Search() {
                                         key={item.id}
                                         href={href}
                                         onClick={clearSearch}
-                                        className="flex items-center px-4 py-2 hover:bg-muted/50 transition-colors text-sm group"
+                                        className="flex items-center justify-between px-6 py-3 hover:bg-muted/50 transition-colors text-sm group"
                                     >
-                                        <div className="flex-1">
-                                            <span className="font-medium group-hover:text-primary transition-colors">{item.name}</span>
-                                            <span className="ml-2 text-xs text-muted-foreground border px-1.5 py-0.5 rounded-full capitalize">
-                                                {item.type}
-                                            </span>
+                                        <div className="flex items-center gap-3">
+                                            <div className="w-1.5 h-1.5 rounded-full bg-primary/30 group-hover:bg-primary transition-colors" />
+                                            <span className="font-bold text-base group-hover:text-primary transition-colors tracking-tight">{item.name}</span>
                                         </div>
+                                        <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/60 border px-2 py-1 rounded-lg border-muted-foreground/20 group-hover:border-primary/30 group-hover:text-primary transition-all">
+                                            {item.type}
+                                        </span>
                                     </Link>
                                 );
                             })}

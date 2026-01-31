@@ -94,7 +94,7 @@ export function Navbar() {
                 </Link>
 
                 {/* Search Bar */}
-                <div className="flex-1 max-w-md mx-6">
+                <div className="flex-1 max-w-2xl mx-6">
                     <Search />
                 </div>
 
