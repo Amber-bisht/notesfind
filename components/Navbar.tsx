@@ -5,7 +5,7 @@ import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { useEffect, useState } from "react";
-import { Menu, X } from "lucide-react";
+import { Menu, X, LogOut } from "lucide-react";
 import { Search } from "./Search";
 import { Nunito } from "next/font/google";
 import { ThemeToggle } from "./ThemeToggle";
@@ -22,6 +22,18 @@ export function Navbar() {
             .then(res => res.json())
             .then(data => setUser(data.user));
     }, [pathname]);
+
+    const handleLogout = async () => {
+        try {
+            const res = await fetch('/api/auth/logout', { method: 'POST' });
+            if (res.ok) {
+                setUser(null);
+                window.location.href = '/';
+            }
+        } catch (error) {
+            console.error("Logout failed:", error);
+        }
+    };
 
     // Use CSS filters for logo color
     // Logo is now a proper image, remove filters that turn it into a black box
@@ -106,21 +118,30 @@ export function Navbar() {
                     <div className="flex items-center gap-4 ml-4">
                         <ThemeToggle />
                         {user ? (
-                            <Link href="/dashboard" className="flex items-center gap-2">
-                                {user.image ? (
-                                    <Image
-                                        src={user.image}
-                                        alt={user.name}
-                                        width={40}
-                                        height={40}
-                                        className="w-10 h-10 rounded-full border"
-                                    />
-                                ) : (
-                                    <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold">
-                                        {user.name?.[0]?.toUpperCase() || "U"}
-                                    </div>
-                                )}
-                            </Link>
+                            <div className="flex items-center gap-4">
+                                <Link href="/dashboard" className="flex items-center gap-2">
+                                    {user.image ? (
+                                        <Image
+                                            src={user.image}
+                                            alt={user.name}
+                                            width={40}
+                                            height={40}
+                                            className="w-10 h-10 rounded-full border"
+                                        />
+                                    ) : (
+                                        <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold">
+                                            {user.name?.[0]?.toUpperCase() || "U"}
+                                        </div>
+                                    )}
+                                </Link>
+                                <button
+                                    onClick={handleLogout}
+                                    className="p-2 text-muted-foreground hover:text-destructive transition-colors"
+                                    title="Logout"
+                                >
+                                    <LogOut className="h-5 w-5" />
+                                </button>
+                            </div>
                         ) : (
                             <Link href="/auth" className="text-base font-medium text-muted-foreground hover:text-foreground">
                                 Login
@@ -151,7 +172,14 @@ export function Navbar() {
                             {link.label}
                         </Link>
                     ))}
-                    {!user && (
+                    {user ? (
+                        <button
+                            onClick={() => { handleLogout(); setIsOpen(false); }}
+                            className="w-full flex items-center gap-2 text-lg font-bold py-2 text-destructive"
+                        >
+                            <LogOut className="h-5 w-5" /> Logout
+                        </button>
+                    ) : (
                         <Link href="/auth" onClick={() => setIsOpen(false)} className="block text-lg font-bold py-2 text-foreground hover:text-primary">
                             Login
                         </Link>

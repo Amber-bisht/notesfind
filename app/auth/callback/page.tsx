@@ -27,9 +27,7 @@ function AuthCallbackContent() {
                 if (res.ok) {
                     const data = await res.json();
                     // Check role to redirect
-                    if (data.user.role === 'admin') {
-                        router.push('/admin');
-                    } else if (data.user.role === 'publisher') {
+                    if (data.user.role === 'admin' || data.user.role === 'publisher') {
                         router.push('/dashboard');
                     } else {
                         router.push('/');

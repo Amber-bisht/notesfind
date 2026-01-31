@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Plus, Pencil, Trash2, Download, User, FileText, Github, Linkedin, Twitter, Globe, Code, MapPin } from "lucide-react";
+import { Plus, Pencil, Trash2, Download, User, FileText, Github, Linkedin, Twitter, Globe, Code, MapPin, LogOut } from "lucide-react";
 import { NoteForm } from "@/components/NoteForm";
 import Link from "next/link";
 import Image from "next/image";
@@ -22,6 +22,7 @@ interface DashboardUser {
     name: string;
     email: string;
     role: string;
+    image?: string;
     phone?: string;
     downloads: {
         noteId: DashboardNote | null; // Populated note or null if deleted
@@ -115,18 +116,70 @@ export default function DashboardPage() {
         if (res.ok) fetchData();
     }
 
-    if (loading) return <div className="p-8 text-center">Loading dashboard...</div>;
-    if (!user) return <div className="p-8 text-center">Please log in to view dashboard.</div>;
+    const handleLogout = async () => {
+        try {
+            const res = await fetch('/api/auth/logout', { method: 'POST' });
+            if (res.ok) {
+                window.location.href = '/';
+            }
+        } catch (error) {
+            console.error("Logout failed:", error);
+        }
+    };
+
+    if (loading) return (
+        <div className="min-h-[60vh] flex items-center justify-center">
+            <div className="flex flex-col items-center gap-4">
+                <div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
+                <p className="text-muted-foreground">Loading dashboard...</p>
+            </div>
+        </div>
+    );
+
+    if (!user) return (
+        <div className="min-h-[60vh] flex items-center justify-center">
+            <div className="text-center space-y-4">
+                <div className="bg-primary/10 w-16 h-16 rounded-full flex items-center justify-center mx-auto text-primary">
+                    <User className="w-8 h-8" />
+                </div>
+                <h1 className="text-2xl font-bold">Please log in</h1>
+                <p className="text-muted-foreground">You need to be authenticated to view your dashboard.</p>
+                <Link href="/auth" className="inline-block px-8 py-3 bg-primary text-primary-foreground rounded-full font-bold hover:opacity-90 transition-opacity">
+                    Login Now
+                </Link>
+            </div>
+        </div>
+    );
 
     const canCreate = ['admin', 'publisher'].includes(user.role);
 
     return (
         <div className="space-y-8 max-w-6xl mx-auto pb-20">
-            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-                <div>
-                    <h1 className="text-3xl font-bold">Dashboard</h1>
-                    <p className="text-muted-foreground">Welcome back, {user.name}</p>
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 bg-card border rounded-2xl p-6 md:p-8 shadow-sm">
+                <div className="flex items-center gap-4">
+                    {user.image ? (
+                        <Image src={user.image} alt={user.name} width={64} height={64} className="w-16 h-16 rounded-full border-2 border-primary/20" />
+                    ) : (
+                        <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center text-2xl font-black text-primary border-2 border-primary/20">
+                            {user.name?.[0]?.toUpperCase()}
+                        </div>
+                    )}
+                    <div>
+                        <h1 className="text-3xl font-black tracking-tight">{user.name}&apos;s Dashboard</h1>
+                        <p className="text-muted-foreground flex items-center gap-2">
+                            <span className="capitalize px-2 py-0.5 bg-primary/10 text-primary text-xs font-bold rounded-full">
+                                {user.role}
+                            </span>
+                            • {user.email}
+                        </p>
+                    </div>
                 </div>
+                <button
+                    onClick={handleLogout}
+                    className="flex items-center gap-2 px-4 py-2 border border-destructive/20 text-destructive hover:bg-destructive hover:text-destructive-foreground rounded-xl transition-all font-bold text-sm"
+                >
+                    <LogOut className="w-4 h-4" /> Logout
+                </button>
             </div>
 
             {/* Tabs Navigation */}

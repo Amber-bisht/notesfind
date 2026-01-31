@@ -28,6 +28,8 @@ export function NoteForm({ initialData, onSuccess, onCancel }: NoteFormProps) {
     const [content, setContent] = useState(initialData?.content || "");
     const [rank, setRank] = useState(initialData?.rank || "");
     const [subCategoryId, setSubCategoryId] = useState(initialData?.subCategoryId?._id || initialData?.subCategoryId || "");
+    const [type, setType] = useState<"internal" | "external">(initialData?.type || "internal");
+    const [externalUrl, setExternalUrl] = useState(initialData?.externalUrl || "");
     const [categories, setCategories] = useState<Category[]>([]);
     const [subCategories, setSubCategories] = useState<SubCategory[]>([]);
     const [selectedCatId, setSelectedCatId] = useState(""); // For filtering subcats
@@ -117,7 +119,7 @@ export function NoteForm({ initialData, onSuccess, onCancel }: NoteFormProps) {
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        const body = { title, slug, content, rank: parseInt(rank), subCategoryId, images };
+        const body = { title, slug, content, rank: parseInt(rank), subCategoryId, images, type, externalUrl };
 
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         let res: any;
@@ -196,6 +198,40 @@ export function NoteForm({ initialData, onSuccess, onCancel }: NoteFormProps) {
             </div>
 
             <div className="space-y-2">
+                <label className="text-sm font-medium">Note Type</label>
+                <div className="flex bg-muted p-1 rounded-xl w-fit">
+                    <button
+                        type="button"
+                        onClick={() => setType("internal")}
+                        className={`px-6 py-2 rounded-lg text-sm font-bold transition-all ${type === "internal" ? "bg-background shadow-sm" : "hover:bg-background/50"}`}
+                    >
+                        Internal (Built-in)
+                    </button>
+                    <button
+                        type="button"
+                        onClick={() => setType("external")}
+                        className={`px-6 py-2 rounded-lg text-sm font-bold transition-all ${type === "external" ? "bg-background shadow-sm" : "hover:bg-background/50"}`}
+                    >
+                        External (Link)
+                    </button>
+                </div>
+            </div>
+
+            {type === "external" && (
+                <div className="space-y-2">
+                    <label className="text-sm font-medium">External URL (Redirect/Download Link)</label>
+                    <input
+                        type="url"
+                        value={externalUrl}
+                        onChange={(e) => setExternalUrl(e.target.value)}
+                        placeholder="https://example.com/notes.pdf"
+                        className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                        required={type === "external"}
+                    />
+                </div>
+            )}
+
+            <div className="space-y-2">
                 <label className="text-sm font-medium">Rank</label>
                 <input
                     type="number"
@@ -206,44 +242,48 @@ export function NoteForm({ initialData, onSuccess, onCancel }: NoteFormProps) {
                 />
             </div>
 
-            <div className="space-y-2">
-                <label className="text-sm font-medium">Content</label>
-                <textarea
-                    value={content}
-                    onChange={(e) => setContent(e.target.value)}
-                    className="flex min-h-[150px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-                    required
-                />
-            </div>
+            {type === "internal" && (
+                <>
+                    <div className="space-y-2">
+                        <label className="text-sm font-medium">Content</label>
+                        <textarea
+                            value={content}
+                            onChange={(e) => setContent(e.target.value)}
+                            className="flex min-h-[150px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                            required={type === "internal"}
+                        />
+                    </div>
 
-            <div className="space-y-2">
-                <label className="text-sm font-medium">Images</label>
-                <div className="flex flex-wrap gap-4">
-                    {images.map((img, idx) => (
-                        <div key={idx} className="relative w-20 h-20 group">
-                            <Image
-                                src={img}
-                                alt="Uploaded"
-                                width={80}
-                                height={80}
-                                className="object-cover rounded"
-                                unoptimized
-                            />
-                            <button
-                                type="button"
-                                onClick={() => setImages(images.filter((_, i) => i !== idx))}
-                                className="absolute -top-2 -right-2 bg-destructive text-white rounded-full p-0.5 opacity-0 group-hover:opacity-100 transition-opacity"
-                            >
-                                <X className="w-4 h-4" />
-                            </button>
+                    <div className="space-y-2">
+                        <label className="text-sm font-medium">Images</label>
+                        <div className="flex flex-wrap gap-4">
+                            {images.map((img, idx) => (
+                                <div key={idx} className="relative w-20 h-20 group">
+                                    <Image
+                                        src={img}
+                                        alt="Uploaded"
+                                        width={80}
+                                        height={80}
+                                        className="object-cover rounded"
+                                        unoptimized
+                                    />
+                                    <button
+                                        type="button"
+                                        onClick={() => setImages(images.filter((_, i) => i !== idx))}
+                                        className="absolute -top-2 -right-2 bg-destructive text-white rounded-full p-0.5 opacity-0 group-hover:opacity-100 transition-opacity"
+                                    >
+                                        <X className="w-4 h-4" />
+                                    </button>
+                                </div>
+                            ))}
+                            <label className="flex items-center justify-center w-20 h-20 border-2 border-dashed rounded cursor-pointer hover:bg-muted/50 transition-colors">
+                                <input type="file" onChange={handleUpload} className="hidden" accept="image/*" disabled={uploading} />
+                                {uploading ? <span className="text-xs">Processing...</span> : <Upload className="w-6 h-6 text-muted-foreground" />}
+                            </label>
                         </div>
-                    ))}
-                    <label className="flex items-center justify-center w-20 h-20 border-2 border-dashed rounded cursor-pointer hover:bg-muted/50 transition-colors">
-                        <input type="file" onChange={handleUpload} className="hidden" accept="image/*" disabled={uploading} />
-                        {uploading ? <span className="text-xs">Processing...</span> : <Upload className="w-6 h-6 text-muted-foreground" />}
-                    </label>
-                </div>
-            </div>
+                    </div>
+                </>
+            )}
 
             <div className="flex justify-end gap-2">
                 <button type="button" onClick={onCancel} className="px-4 py-2 text-sm font-medium transition-colors hover:bg-muted rounded-md">

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { verifyToken } from "@/lib/auth";
 import User from "@/models/User";
 import dbConnect from "@/lib/db";
+import { createAuditLog } from "@/lib/audit";
 
 export async function POST(req: NextRequest) {
     try {
@@ -33,6 +34,14 @@ export async function POST(req: NextRequest) {
         if (!alreadyDownloaded) {
             user.downloads.push({ noteId, slug, downloadedAt: new Date() });
             await user.save();
+
+            await createAuditLog(
+                user._id,
+                "note_download",
+                `User downloaded note: ${slug}`,
+                noteId,
+                { slug }
+            );
         }
 
         return NextResponse.json({ message: "Download tracked" });

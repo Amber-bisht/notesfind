@@ -116,6 +116,7 @@ export async function Footer() {
                     <div className="flex gap-6">
                         <Link href="/privacy" className="hover:text-foreground">Privacy Policy</Link>
                         <Link href="/terms" className="hover:text-foreground">Terms of Service</Link>
+                        <Link href="/copyright" className="hover:text-foreground">Copyright</Link>
                     </div>
                 </div>
             </div>

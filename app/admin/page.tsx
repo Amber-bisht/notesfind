@@ -1,6 +1,7 @@
 "use client";
 
 import { Users, Shield } from "lucide-react";
+import Link from "next/link";
 
 export default function AdminDashboard() {
     return (
@@ -16,9 +17,9 @@ export default function AdminDashboard() {
             </div>
 
             <div className="grid gap-6 md:grid-cols-2">
-                <div className="rounded-xl border bg-card text-card-foreground shadow p-6">
+                <Link href="/admin/users" className="block rounded-xl border bg-card text-card-foreground shadow p-6 hover:shadow-lg hover:border-primary/20 transition-all group">
                     <div className="flex items-center gap-4 mb-4">
-                        <div className="p-3 bg-blue-500/10 text-blue-500 rounded-lg">
+                        <div className="p-3 bg-blue-500/10 text-blue-500 rounded-lg group-hover:bg-blue-500 group-hover:text-white transition-colors">
                             <Users className="w-6 h-6" />
                         </div>
                         <h3 className="font-semibold text-xl">User Management</h3>
@@ -26,14 +27,14 @@ export default function AdminDashboard() {
                     <p className="text-muted-foreground mb-4">
                         View and manage registered users, specific roles, and permissions.
                     </p>
-                    <button className="w-full py-2 bg-secondary text-secondary-foreground rounded-lg font-medium text-sm hover:bg-secondary/80 transition-colors" disabled>
-                        Coming Soon
-                    </button>
-                </div>
+                    <div className="w-full py-2 bg-primary text-primary-foreground rounded-lg font-bold text-sm text-center">
+                        Manage Users
+                    </div>
+                </Link>
 
-                <div className="rounded-xl border bg-card text-card-foreground shadow p-6 opacity-60">
+                <Link href="/admin/users?tab=logs" className="block rounded-xl border bg-card text-card-foreground shadow p-6 hover:shadow-lg hover:border-primary/20 transition-all group">
                     <div className="flex items-center gap-4 mb-4">
-                        <div className="p-3 bg-green-500/10 text-green-500 rounded-lg">
+                        <div className="p-3 bg-green-500/10 text-green-500 rounded-lg group-hover:bg-green-500 group-hover:text-white transition-colors">
                             <Shield className="w-6 h-6" />
                         </div>
                         <h3 className="font-semibold text-xl">System Logs</h3>
@@ -41,10 +42,10 @@ export default function AdminDashboard() {
                     <p className="text-muted-foreground mb-4">
                         Audit sensitive actions and view error logs.
                     </p>
-                    <button className="w-full py-2 bg-secondary text-secondary-foreground rounded-lg font-medium text-sm hover:bg-secondary/80 transition-colors" disabled>
-                        Coming Soon
-                    </button>
-                </div>
+                    <div className="w-full py-2 bg-secondary text-secondary-foreground rounded-lg font-bold text-sm text-center">
+                        View Logs
+                    </div>
+                </Link>
             </div>
         </div>
     );

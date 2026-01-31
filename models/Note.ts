@@ -7,6 +7,8 @@ export interface INote extends Document {
     subCategoryId: mongoose.Types.ObjectId;
     authorId: mongoose.Types.ObjectId;
     images: string[];
+    type: 'internal' | 'external';
+    externalUrl?: string;
     isPublished: boolean;
     rank?: number;
     views: number;
@@ -27,9 +29,19 @@ const NoteSchema: Schema<INote> = new Schema(
             required: [true, 'Please provide a slug'],
             unique: true,
         },
+        type: {
+            type: String,
+            enum: ['internal', 'external'],
+            default: 'internal',
+        },
+        externalUrl: {
+            type: String,
+        },
         content: {
             type: String,
-            required: [true, 'Please provide content'],
+            required: function (this: INote) {
+                return this.type === 'internal';
+            },
         },
         subCategoryId: {
             type: Schema.Types.ObjectId,

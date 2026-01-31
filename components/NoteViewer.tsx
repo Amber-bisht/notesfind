@@ -4,7 +4,7 @@
 import { useRef, useState, useEffect } from "react";
 import Link from 'next/link';
 import Image from 'next/image';
-import { ArrowLeft, Calendar, User, Eye, ThumbsUp } from 'lucide-react';
+import { ArrowLeft, Calendar, User, Eye, ThumbsUp, ExternalLink, Download } from 'lucide-react';
 import { NotePDFButton } from "./NotePDFButton";
 // import { toast } from "react-hot-toast";
 
@@ -93,11 +93,12 @@ export function NoteViewer({ note, categorySlug, subCategorySlug, currentUser, i
                     </Link>
                 )}
 
-                <NotePDFButton contentRef={contentRef} noteTitle={note.title} noteId={note._id} noteSlug={note.slug} />
+                {note.type !== 'external' && (
+                    <NotePDFButton contentRef={contentRef} noteTitle={note.title} noteId={note._id} noteSlug={note.slug} />
+                )}
             </div>
 
-            <article ref={contentRef} className="space-y-8 p-8 bg-background">
-                {/* Added bg-background and padding to ensure PDF looks like a page */}
+            <article ref={contentRef} className="space-y-8 p-8 bg-background border rounded-3xl shadow-sm">
                 <div className="space-y-4">
                     <h1 className="text-4xl md:text-5xl font-extrabold tracking-tight leading-tight">{note.title}</h1>
 
@@ -131,22 +132,46 @@ export function NoteViewer({ note, categorySlug, subCategorySlug, currentUser, i
                     </div>
                 </div>
 
-                <div className="prose prose-lg dark:prose-invert max-w-none">
-                    {note.content.split('\n').map((line: string, i: number) => (
-                        <p key={i}>{line}</p>
-                    ))}
-
-                    {note.images && note.images.length > 0 && (
-                        <div className="grid gap-4 my-8">
-                            {note.images.map((img: string, i: number) => (
-                                <figure key={i}>
-                                    {/* Use standard img for better html2canvas compatibility than Next/Image - Keeping Image here as requested but using unoptimized might help if needed */}
-                                    <Image src={img} alt={`Note image ${i + 1}`} width={800} height={600} className="rounded-xl border shadow-sm w-full h-auto" />
-                                </figure>
-                            ))}
+                {note.type === 'external' ? (
+                    <div className="py-12 flex flex-col items-center justify-center text-center space-y-6">
+                        <div className="w-20 h-20 bg-primary/10 rounded-full flex items-center justify-center text-primary">
+                            <Download className="w-10 h-10" />
                         </div>
-                    )}
-                </div>
+                        <div className="space-y-2 max-w-md">
+                            <h2 className="text-2xl font-bold">External Resource</h2>
+                            <p className="text-muted-foreground italic">
+                                This note is hosted externally. Click the button below to view or download the resource.
+                            </p>
+                        </div>
+                        <a
+                            href={note.externalUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-flex items-center gap-2 px-8 py-4 bg-primary text-primary-foreground rounded-2xl font-black text-lg hover:scale-105 active:scale-95 transition-all shadow-lg shadow-primary/20"
+                        >
+                            <ExternalLink className="w-5 h-5" /> Open Resource
+                        </a>
+                        <p className="text-xs text-muted-foreground font-medium">
+                            URL: <span className="underline">{note.externalUrl}</span>
+                        </p>
+                    </div>
+                ) : (
+                    <div className="prose prose-lg dark:prose-invert max-w-none">
+                        {note.content.split('\n').map((line: string, i: number) => (
+                            <p key={i}>{line}</p>
+                        ))}
+
+                        {note.images && note.images.length > 0 && (
+                            <div className="grid gap-4 my-8">
+                                {note.images.map((img: string, i: number) => (
+                                    <figure key={i}>
+                                        <Image src={img} alt={`Note image ${i + 1}`} width={800} height={600} className="rounded-xl border shadow-sm w-full h-auto" />
+                                    </figure>
+                                ))}
+                            </div>
+                        )}
+                    </div>
+                )}
 
                 {/* Footer for PDF only */}
                 <div className="mt-20 pt-8 border-t text-center text-sm text-muted-foreground hidden print:block">
