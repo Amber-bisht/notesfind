@@ -23,17 +23,8 @@ jobs:
             cd ~/note.com
             git pull origin main
             
-            # Create .env file from secrets
-            echo "MONGODB_URI=${{ secrets.MONGODB_URI }}" > .env
-            echo "NEXT_PUBLIC_GOOGLE_CLIENT_ID=${{ secrets.NEXT_PUBLIC_GOOGLE_CLIENT_ID }}" >> .env
-            echo "GOOGLE_CLIENT_SECRET=${{ secrets.GOOGLE_CLIENT_SECRET }}" >> .env
-            echo "JWT_SECRET=${{ secrets.JWT_SECRET }}" >> .env
-            echo "CLOUDINARY_CLOUD_NAME=${{ secrets.CLOUDINARY_CLOUD_NAME }}" >> .env
-            echo "CLOUDINARY_API_KEY=${{ secrets.CLOUDINARY_API_KEY }}" >> .env
-            echo "CLOUDINARY_API_SECRET=${{ secrets.CLOUDINARY_API_SECRET }}" >> .env
-            echo "CLOUDINARY_URL=${{ secrets.CLOUDINARY_URL }}" >> .env
-            echo "NEXT_PUBLIC_CLOUDFLARE_SITE_KEY=${{ secrets.NEXT_PUBLIC_CLOUDFLARE_SITE_KEY }}" >> .env
-            echo "CLOUDFLARE_SECRET_KEY=${{ secrets.CLOUDFLARE_SECRET_KEY }}" >> .env
+            # Create .env file from the DOTENV secret
+            echo "${{ secrets.DOTENV }}" > .env
             
             docker-compose down
             docker-compose up -d --build
