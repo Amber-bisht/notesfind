@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { verifyToken } from '@/lib/auth';
 import dbConnect from '@/lib/db';
-import User from '@/models/User';
+import User, { UserRole } from '@/models/User';
 
 import { createAuditLog } from '@/lib/audit';
 
@@ -22,9 +22,8 @@ export async function GET(req: NextRequest) {
         const role = searchParams.get('role');
 
         await dbConnect();
-        const { UserRole } = require('@/models/User');
 
-        const query: any = role ? { role: role as UserRole } : {};
+        const query = role ? { role: role as UserRole } : {};
 
         const [users, total] = await Promise.all([
             User.find(query)
