@@ -7,11 +7,16 @@ import WebinarClient from "./WebinarClient";
 export const revalidate = 3600;
 
 export async function generateStaticParams() {
-    await dbConnect();
-    const webinars = await Webinar.find({}, { _id: 1 }).lean();
-    return webinars.map((webinar) => ({
-        id: webinar._id.toString(),
-    }));
+    try {
+        await dbConnect();
+        const webinars = await Webinar.find({}, { _id: 1 }).limit(10).lean();
+        return webinars.map((webinar) => ({
+            id: (webinar._id as any).toString(),
+        }));
+    } catch (error) {
+        console.warn("DB connection failed during webinar SSG, skipping static generation...");
+        return [];
+    }
 }
 
 async function getWebinar(id: string) {
