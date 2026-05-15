@@ -44,7 +44,7 @@ export async function POST(req: NextRequest) {
         await createAuditLog(payload.userId as string, {
             action: 'create_category',
             details: `User created category: ${category.name}`,
-            targetId: category._id as string,
+            targetId: category._id.toString(),
         });
 
         revalidatePath('/', 'layout'); // Purge cache

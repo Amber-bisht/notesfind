@@ -35,7 +35,7 @@ export async function POST(req: NextRequest) {
             user.downloads.push({ noteId, slug, downloadedAt: new Date() });
             await user.save();
 
-            await createAuditLog(user._id as string, {
+            await createAuditLog(user._id.toString(), {
                 action: "note_download",
                 details: `User downloaded note: ${slug}`,
                 targetId: noteId,

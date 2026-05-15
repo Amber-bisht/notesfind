@@ -82,7 +82,7 @@ export async function POST(req: NextRequest) {
         await createAuditLog(payload.userId as string, {
             action: 'publish_note',
             details: `User published note: ${note.title}`,
-            targetId: note._id as string,
+            targetId: note._id.toString(),
             metadata: { slug: note.slug }
         });
 

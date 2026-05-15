@@ -55,7 +55,7 @@ export async function DELETE(req: NextRequest, props: { params: Promise<{ id: st
         await createAuditLog(payload.userId as string, {
             action: 'delete_note',
             details: `User deleted note: ${note.title}`,
-            targetId: note._id as string,
+            targetId: note._id.toString(),
             metadata: { slug: note.slug }
         });
 
@@ -119,7 +119,7 @@ export async function PUT(req: NextRequest, props: { params: Promise<{ id: strin
         await createAuditLog(payload.userId as string, {
             action: 'update_note',
             details: `User updated note: ${updatedNote?.title}`,
-            targetId: updatedNote?._id as string,
+            targetId: updatedNote?._id.toString(),
             metadata: { slug: updatedNote?.slug }
         });
 

@@ -45,7 +45,7 @@ export async function DELETE(req: NextRequest, props: { params: Promise<{ id: st
         await createAuditLog(payload.userId as string, {
             action: 'delete_category',
             details: `User deleted category: ${category.name}`,
-            targetId: category._id as string,
+            targetId: category._id.toString(),
         });
 
         revalidatePath('/', 'layout');
@@ -90,7 +90,7 @@ export async function PUT(req: NextRequest, props: { params: Promise<{ id: strin
         await createAuditLog(payload.userId as string, {
             action: 'update_category',
             details: `User updated category: ${category.name}`,
-            targetId: category._id as string,
+            targetId: category._id.toString(),
         });
 
         revalidatePath('/', 'layout');

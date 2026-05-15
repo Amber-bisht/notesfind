@@ -57,7 +57,7 @@ export async function POST(req: NextRequest) {
         });
 
         // Log Login
-        await createAuditLog(user._id as string, {
+        await createAuditLog(user._id.toString(), {
             action: 'login',
             details: `User logged in: ${user.email}`,
         });
