@@ -12,6 +12,7 @@ interface Category {
 interface SubCategory {
     _id: string;
     name: string;
+    slug: string;
     categoryId: string | Category;
 }
 

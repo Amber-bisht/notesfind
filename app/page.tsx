@@ -328,7 +328,7 @@ export default async function Home() {
                     </div>
 
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                        {categories.slice(0, 4).map((category: { _id: string; slug: string; image?: string; name: string; count: number }) => (
+                        {categories.slice(0, 4).map((category: PageCategory) => (
                             <Link key={category._id} href={`/${category.slug}`} className="group relative rounded-2xl border border-border bg-card text-card-foreground shadow-sm transition-all duration-300 hover:shadow-lg hover:-translate-y-2 hover:border-foreground hover:ring-1 hover:ring-foreground/10 overflow-hidden">
                                 <div className="aspect-[3/2] bg-muted relative overflow-hidden border-b border-border transition-colors group-hover:border-foreground">
                                     {category.image ? (
