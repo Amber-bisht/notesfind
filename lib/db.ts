@@ -10,7 +10,7 @@ import '@/models/Service';
 
 const MONGODB_URI = process.env.MONGODB_URI;
 
-if (!MONGODB_URI) {
+if (!MONGODB_URI && process.env.NODE_ENV === 'production' && process.env.NEXT_PHASE !== 'phase-production-build') {
     throw new Error(
         'Please define the MONGODB_URI environment variable inside .env.local'
     );
@@ -42,9 +42,18 @@ async function dbConnect() {
         return cached!.conn;
     }
 
+    // BUILD OPTIMIZATION: Instant fail if we are in the build phase or using a placeholder
+    const isBuildPhase = process.env.NEXT_PHASE === 'phase-production-build' || process.env.NODE_ENV === 'production' && !process.env.MONGODB_URI?.includes('mongodb+srv');
+    
+    if (isBuildPhase && !cached!.conn) {
+        console.warn('=> Skipping DB connection instantly during build phase.');
+        return null;
+    }
+
     if (!cached!.promise) {
         const opts = {
             bufferCommands: false,
+            serverSelectionTimeoutMS: isBuildPhase ? 1000 : 30000, // 1s timeout during build, 30s otherwise
         };
 
         cached!.promise = mongoose.connect(MONGODB_URI!, opts).then((mongoose) => {
@@ -57,8 +66,7 @@ async function dbConnect() {
     } catch (e) {
         cached!.promise = null;
         
-        // Build-time safety: don't crash the build if DB is missing
-        if (process.env.NEXT_PHASE === 'phase-production-build' || process.env.NODE_ENV === 'production') {
+        if (isBuildPhase) {
             console.warn('=> MongoDB connection failed during build phase. Pages will be dynamic.');
             return null;
         }
