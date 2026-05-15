@@ -1,0 +1,99 @@
+import Link from 'next/link';
+import Image from 'next/image';
+import { notFound } from 'next/navigation';
+import dbConnect from '@/lib/db';
+import Category from '@/models/Category';
+import SubCategory from '@/models/SubCategory';
+import { Folder } from 'lucide-react';
+import { ViewTracker } from '@/components/ViewTracker';
+
+interface Params {
+    params: Promise<{ category: string }>;
+}
+
+export async function generateStaticParams() {
+    try {
+        await dbConnect();
+        const categories = await Category.find({}, 'slug').lean();
+        return categories.map((c: { slug: string }) => ({
+            category: c.slug,
+        }));
+    } catch (e) {
+        console.warn('DB connection failed during SSG for categories, skipping static generation', e);
+        return [];
+    }
+}
+
+export async function generateMetadata(props: Params) {
+    const params = await props.params;
+    await dbConnect();
+    const category = await Category.findOne({ slug: params.category }).lean() as { name: string; description?: string; _id: string } | null;
+    if (!category) return { title: 'Not Found' };
+
+    return {
+        title: `${category.name} Notes - NotesFind`,
+        description: category.description || `Browse ${category.name} notes and tutorials.`,
+    };
+}
+
+export default async function CategoryPage(props: Params) {
+    const params = await props.params;
+    await dbConnect();
+
+    const category = await Category.findOne({ slug: params.category }).lean() as { name: string; description?: string; slug: string; _id: string } | null;
+    if (!category) return notFound();
+
+    const subCategories = await SubCategory.find({ categoryId: category._id }).sort({ name: 1 }).lean() as unknown as {
+        _id: string;
+        slug: string;
+        image?: string;
+        name: string;
+        description?: string;
+    }[];
+
+    return (
+        <div className="space-y-8">
+            <ViewTracker id={category._id.toString()} type="category" />
+            <div className="space-y-2">
+                <h1 className="text-4xl font-bold tracking-tight">{category.name}</h1>
+                <p className="text-xl text-muted-foreground">{category.description}</p>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {subCategories.map((sub) => (
+                    <Link key={sub._id} href={`/${category.slug}/${sub.slug}`} className="group rounded-2xl border border-border bg-card text-card-foreground shadow transition-all duration-300 hover:shadow-2xl hover:-translate-y-2 hover:border-foreground hover:ring-1 hover:ring-foreground/10 block overflow-hidden h-full flex flex-col">
+                        <div className="relative aspect-video w-full overflow-hidden bg-muted border-b border-border transition-colors group-hover:border-foreground">
+                            {sub.image ? (
+                                <Image
+                                    src={sub.image}
+                                    alt={sub.name}
+                                    width={400}
+                                    height={225}
+                                    className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110"
+                                />
+                            ) : (
+                                <div className="flex h-full w-full items-center justify-center bg-primary/10 transition-colors">
+                                    <Folder className="h-10 w-10 text-primary/40" />
+                                </div>
+                            )}
+                        </div>
+                        <div className="p-6 flex flex-col flex-1">
+                            <h3 className="text-xl font-bold mb-2 group-hover:text-primary transition-colors">{sub.name}</h3>
+                            <p className="text-muted-foreground line-clamp-2 text-sm flex-1">
+                                {sub.description || "Browse topics and tutorials."}
+                            </p>
+                            <div className="pt-4 mt-auto">
+                                <span className="text-sm font-bold text-primary bg-primary/10 px-3 py-1 rounded-full group-hover:bg-primary group-hover:text-primary-foreground transition-all">
+                                    Explore
+                                </span>
+                            </div>
+                        </div>
+                    </Link>
+                ))}
+                {subCategories.length === 0 && (
+                    <p className="text-muted-foreground col-span-full text-center py-12">No sub-categories found.</p>
+                )}
+            </div>
+        </div>
+    );
+}

@@ -1,0 +1,99 @@
+[
+    {
+        "platform": "Telegram",
+        "icon": "MessageCircle",
+        "description": "Join our Telegram Commmunities for instant updates and discussions.",
+        "links": [
+            {
+                "name": "Notes Community",
+                "url": "https://t.me/addlist/nN4gI1IU6OE4MTc1"
+            },
+            {
+                "name": "Unlocked Coding Community",
+                "url": "https://t.me/addlist/Urc_P6Enf301Mzll"
+            }
+        ]
+    },
+    {
+        "platform": "LinkedIn",
+        "icon": "Linkedin",
+        "description": "Connect with us on LinkedIn Page for professional updates.",
+        "links": [
+            {
+                "name": "Notes Find Company",
+                "url": "https://www.linkedin.com/company/notesfind"
+            },
+            {
+                "name": "Lexions Community",
+                "url": "https://www.linkedin.com/company/lexionscommunity"
+            }
+        ]
+    },
+    {
+        "platform": "Whatsapp",
+        "icon": "Whatsapp",
+        "description": "Follow us on Whatsapp for stay connected.",
+        "links": [
+            {
+                "name": "NotesFind.com Public Channel",
+                "url": "https://whatsapp.com/channel/0029VbBrlHRGJP89Y3fN6C2L"
+            },
+            {
+                "name": "LexionsCommunity.com Public Channel",
+                "url": "https://whatsapp.com/channel/0029VahMPFMJkK721FZI3s2Q"
+            },
+            {
+                "name": "AiTeamSeven.com Public Channel",
+                "url": "https://whatsapp.com/channel/0029Vb71Ruw4NVin4EOmGx3v"
+            },
+            {
+                "name": "Unlocked Coding Public Channel",
+                "url": "https://whatsapp.com/channel/0029VahMPFMJkK721FZI3s2Q"
+            }
+        ]
+    },
+    {
+        "platform": "GitHub",
+        "icon": "Github",
+        "description": "Follow us on LinkedIn Page for getting Latest Project updates.",
+        "links": [
+            {
+                "name": "NotesFind.com Account",
+                "url": "https://github.com/notesfind"
+            }
+        ]
+    },
+    {
+        "platform": "YouTube",
+        "icon": "Youtube",
+        "description": "Subscribe to our YouTube channel for tutorials and guides.",
+        "links": [
+            {
+                "name": "NotesFind Channel",
+                "url": "https://www.youtube.com/@NotesFind"
+            }
+        ]
+    },
+    {
+        "platform": "Instagram",
+        "icon": "Instagram",
+        "description": "Follow us on Instagram for visual updates and stories.",
+        "links": [
+            {
+                "name": "NotesFind",
+                "url": "https://www.instagram.com/notesfind"
+            }
+        ]
+    },
+    {
+        "platform": "X (Twitter)",
+        "icon": "Twitter",
+        "description": "Follow us on X for the latest tweets and announcements.",
+        "links": [
+            {
+                "name": "NotesFindCom",
+                "url": "https://x.com/NotesFindCom"
+            }
+        ]
+    }
+]

@@ -1,0 +1,48 @@
+import type { Metadata } from "next";
+import { Inter } from "next/font/google";
+import "./globals.css";
+import { ThemeProvider } from "@/components/theme-provider";
+import { Navbar } from "@/components/Navbar";
+import { Footer } from "@/components/Footer";
+
+import { CookieBanner } from "@/components/CookieBanner";
+
+const inter = Inter({ subsets: ["latin"] });
+
+export const metadata: Metadata = {
+    title: "NotesFind - Best Notes for AI & Full Stack and DSA",
+    description: "Best Notes for AI & Full Stack and DSA For GATE AI, NET AI, Interviews and University .",
+    icons: {
+        icon: '/image.png',
+        shortcut: '/image.png',
+        apple: '/image.png',
+    },
+};
+
+export default function RootLayout({
+    children,
+}: Readonly<{
+    children: React.ReactNode;
+}>) {
+    return (
+        <html lang="en" suppressHydrationWarning>
+            <body className={inter.className}>
+                <ThemeProvider
+                    attribute="class"
+                    defaultTheme="system"
+                    enableSystem
+                    disableTransitionOnChange
+                >
+                    <div className="flex min-h-screen flex-col">
+                        <Navbar />
+                        <main className="flex-1 container mx-auto px-4 py-8">
+                            {children}
+                        </main>
+                        <Footer />
+                        <CookieBanner />
+                    </div>
+                </ThemeProvider>
+            </body>
+        </html>
+    );
+}

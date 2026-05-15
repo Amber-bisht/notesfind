@@ -1,0 +1,46 @@
+import { NextRequest, NextResponse } from 'next/server';
+import dbConnect from '@/lib/db';
+import SubCategory from '@/models/SubCategory';
+import { verifyToken } from '@/lib/auth';
+import { UserRole } from '@/models/User';
+
+export async function GET(req: NextRequest) {
+    await dbConnect();
+    const { searchParams } = new URL(req.url);
+    const categoryId = searchParams.get('categoryId');
+
+    try {
+        const query = categoryId ? { categoryId } : {};
+        const subCategories = await SubCategory.find(query).populate('categoryId', 'name slug').sort({ createdAt: -1 });
+        return NextResponse.json({ subCategories });
+    } catch {
+        return NextResponse.json({ error: 'Failed to fetch sub-categories' }, { status: 500 });
+    }
+}
+
+import { revalidatePath } from 'next/cache';
+
+// ... (GET handler same)
+
+export async function POST(req: NextRequest) {
+    try {
+        const token = req.cookies.get('token')?.value;
+        const payload = token ? await verifyToken(token) : null;
+
+        if (!payload || !['owner', 'co_owner', 'publisher'].includes(payload.role as string)) {
+            return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+        }
+
+        const body = await req.json();
+        await dbConnect();
+        const subCategory = await SubCategory.create(body);
+
+        revalidatePath('/', 'layout');
+        return NextResponse.json({ subCategory }, { status: 201 });
+    } catch (error) {
+        if ((error as { code?: number }).code === 11000) {
+            return NextResponse.json({ error: 'SubCategory slug or rank already exists in this category' }, { status: 400 });
+        }
+        return NextResponse.json({ error: (error as Error).message }, { status: 400 });
+    }
+}
