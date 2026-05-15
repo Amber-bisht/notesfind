@@ -27,12 +27,18 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Set lower case owner name
+        run: |
+          echo "OWNER_LC=${OWNER,,}" >>${GITHUB_ENV}
+        env:
+          OWNER: '${{ github.repository_owner }}'
+
       - name: Build and push Docker image
         uses: docker/build-push-action@v5
         with:
           context: .
           push: true
-          tags: ghcr.io/${{ github.repository_owner }}/notesfind:latest
+          tags: ghcr.io/${{ env.OWNER_LC }}/notesfind:latest
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
@@ -40,6 +46,12 @@ jobs:
     needs: build-and-push
     runs-on: ubuntu-latest
     steps:
+      - name: Set lower case owner name
+        run: |
+          echo "OWNER_LC=${OWNER,,}" >>${GITHUB_ENV}
+        env:
+          OWNER: '${{ github.repository_owner }}'
+
       - name: Deploy to VPS via SSH
         uses: appleboy/ssh-action@v1.2.1
         with:
@@ -61,7 +73,7 @@ jobs:
             version: '3.8'
             services:
               web:
-                image: ghcr.io/${{ github.repository_owner }}/notesfind:latest
+                image: ghcr.io/${{ env.OWNER_LC }}/notesfind:latest
                 ports:
                   - "3000:3000"
                 env_file:
