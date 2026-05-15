@@ -56,6 +56,12 @@ async function dbConnect() {
         cached!.conn = await cached!.promise;
     } catch (e) {
         cached!.promise = null;
+        
+        // Build-time safety: don't crash the build if DB is missing
+        if (process.env.NEXT_PHASE === 'phase-production-build' || process.env.NODE_ENV === 'production') {
+            console.warn('=> MongoDB connection failed during build phase. Pages will be dynamic.');
+            return null;
+        }
         throw e;
     }
 
