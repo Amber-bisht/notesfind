@@ -96,7 +96,7 @@ export async function PATCH(req: NextRequest) {
         await createAuditLog(session.userId as string, {
             action: 'role_change',
             details: `Owner ${session.email} changed ${targetUser.email} role from ${oldRole} to ${role || oldRole}${assignedCategories ? ' and updated categories' : ''}`,
-            targetId: targetUser._id as string,
+            targetId: targetUser._id.toString(),
             metadata: { oldRole, newRole: role, assignedCategories }
         });
 
