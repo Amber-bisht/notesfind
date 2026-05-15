@@ -13,7 +13,7 @@ const redisClient = () => {
     });
 };
 
-const globalForRedis = global as unknown as { redis: Redis };
+const globalForRedis = global as unknown as { redis: any };
 
 export const redis = globalForRedis.redis || redisClient();
 
