@@ -26,7 +26,9 @@ export async function generateStaticParams() {
 
 export async function generateMetadata(props: Params) {
     const params = await props.params;
-    await dbConnect();
+    const conn = await dbConnect();
+    if (!conn) return { title: 'Category - NotesFind' };
+    
     const category = await Category.findOne({ slug: params.category }).lean() as { name: string; description?: string; _id: string } | null;
     if (!category) return { title: 'Not Found' };
 
@@ -38,7 +40,8 @@ export async function generateMetadata(props: Params) {
 
 export default async function CategoryPage(props: Params) {
     const params = await props.params;
-    await dbConnect();
+    const conn = await dbConnect();
+    if (!conn) return notFound();
 
     const category = await Category.findOne({ slug: params.category }).lean() as { name: string; description?: string; slug: string; _id: string } | null;
     if (!category) return notFound();

@@ -53,7 +53,8 @@ export async function generateStaticParams() {
 
 export async function generateMetadata(props: Params) {
     const params = await props.params;
-    await dbConnect();
+    const conn = await dbConnect();
+    if (!conn) return { title: 'Note - NotesFind' };
 
     // Check if it's a SubCategory page first (category is Category slug)
     const category = await Category.findOne({ slug: params.category }).select('_id').lean();
@@ -84,7 +85,8 @@ export async function generateMetadata(props: Params) {
 
 export default async function DualRoutePage(props: Params) {
     const params = await props.params;
-    await dbConnect();
+    const conn = await dbConnect();
+    if (!conn) return notFound();
 
     // 1. DETECT TYPE: Check if slug1 is a Category
     const category = await Category.findOne({ slug: params.category }).lean() as any;

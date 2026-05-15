@@ -8,14 +8,16 @@ import Webinar from "@/models/Webinar";
 export const revalidate = 3600;
 
 async function getUpcomingWebinars() {
-    await dbConnect();
+    const conn = await dbConnect();
+    if (!conn) return [];
     const now = new Date();
     const webinars = await Webinar.find({ timestamp: { $gte: now } }).sort({ timestamp: 1 }).lean();
     return JSON.parse(JSON.stringify(webinars));
 }
 
 async function getPastWebinars() {
-    await dbConnect();
+    const conn = await dbConnect();
+    if (!conn) return [];
     const now = new Date();
     const webinars = await Webinar.find({ timestamp: { $lt: now } }).sort({ timestamp: -1 }).lean();
     return JSON.parse(JSON.stringify(webinars));

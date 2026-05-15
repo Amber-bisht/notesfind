@@ -20,7 +20,8 @@ export async function generateStaticParams() {
 }
 
 async function getWebinar(id: string) {
-    await dbConnect();
+    const conn = await dbConnect();
+    if (!conn) return null;
     const webinar = await Webinar.findById(id).populate('createdBy', 'name email').lean();
     if (!webinar) return null;
     return JSON.parse(JSON.stringify(webinar));
@@ -28,6 +29,8 @@ async function getWebinar(id: string) {
 
 export default async function WebinarDetailPage({ params }: { params: Promise<{ id: string }> }) {
     const { id } = await params;
+    const conn = await dbConnect();
+    if (!conn) return notFound();
     const webinar = await getWebinar(id);
 
     if (!webinar) {
