@@ -48,11 +48,11 @@ interface PageNote {
 }
 
 async function getData() {
-    await dbConnect();
-    // Ensure SubCategory model is registered for the lookup to work nicely if using populate,
-    // though for aggregate we use collection name 'subcategories'
-    // but good practice to have the model loaded.
-    await SubCategory.init();
+    const conn = await dbConnect();
+    if (!conn) {
+        console.warn("Skipping data fetch in home page due to missing DB connection...");
+        return { categories: [], notes: [], subCategories: [] };
+    }
 
     try {
         const [categories, notes, noteCounts, subCategories] = await Promise.all([

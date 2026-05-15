@@ -31,7 +31,14 @@ interface PageNote {
 }
 
 export default async function Pages() {
-    await dbConnect();
+    const conn = await dbConnect();
+    if (!conn) {
+        return (
+            <div className="min-h-screen flex items-center justify-center">
+                <p className="text-muted-foreground italic">Database unavailable during build. Please check back later.</p>
+            </div>
+        );
+    }
 
     // Fetch all published notes populated with subCategory
     const allNotes = await Note.find({ isPublished: true })
