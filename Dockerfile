@@ -15,6 +15,10 @@ RUN pnpm install --no-frozen-lockfile
 # Copy the rest of the application code
 COPY . .
 
+# Set dummy environment variables for build time
+ENV JWT_SECRET=build_placeholder
+ENV MONGODB_URI=mongodb://localhost:27017/unused_during_build
+
 # Build the Next.js application
 RUN pnpm run build
 
