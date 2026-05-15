@@ -7,7 +7,7 @@ import { verifyToken } from '@/lib/auth';
 // but for Global Middleware, we'll use a performant header-based approach 
 // and apply the heavy Redis limiting specifically to API routes to avoid slowing down static assets.
 
-export async function middleware(request: NextRequest) {
+export default async function proxy(request: NextRequest) {
     const path = request.nextUrl.pathname;
     const ip = request.headers.get('x-forwarded-for') || 'local';
 
