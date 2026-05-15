@@ -22,8 +22,9 @@ export async function GET(req: NextRequest) {
         const role = searchParams.get('role');
 
         await dbConnect();
+        const { UserRole } = require('@/models/User');
 
-        const query = role ? { role } : {};
+        const query: any = role ? { role: role as UserRole } : {};
 
         const [users, total] = await Promise.all([
             User.find(query)
