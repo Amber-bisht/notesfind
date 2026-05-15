@@ -5,7 +5,8 @@ import Category from '@/models/Category';
 import { BookOpen, ArrowRight } from 'lucide-react';
 
 async function getCategories() {
-    await dbConnect();
+    const conn = await dbConnect();
+    if (!conn) return [];
     try {
         const categories = await Category.find({}).sort({ createdAt: -1 }).lean();
         return JSON.parse(JSON.stringify(categories));

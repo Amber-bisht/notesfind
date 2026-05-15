@@ -8,7 +8,8 @@ import { Eye, Clock, Hash } from 'lucide-react';
 export const revalidate = 60; // Revalidate every 60 seconds
 
 async function getTrendingNotes() {
-    await dbConnect();
+    const conn = await dbConnect();
+    if (!conn) return [];
     return Note.find({ isPublished: true })
         .sort({ views: -1 })
         .limit(10)
@@ -21,7 +22,8 @@ async function getTrendingNotes() {
 }
 
 async function getLatestNotes() {
-    await dbConnect();
+    const conn = await dbConnect();
+    if (!conn) return [];
     return Note.find({ isPublished: true })
         .sort({ createdAt: -1 })
         .limit(10)
