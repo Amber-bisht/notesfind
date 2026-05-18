@@ -3,8 +3,7 @@ import dbConnect from "@/lib/db";
 import Webinar from "@/models/Webinar";
 import WebinarClient from "./WebinarClient";
 
-// Re-validate every hour
-export const revalidate = 3600;
+export const revalidate = 300; // 5 minutes
 
 export async function generateStaticParams() {
     try {

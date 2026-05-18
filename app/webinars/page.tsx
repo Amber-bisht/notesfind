@@ -4,8 +4,7 @@ import { Calendar, MapPin, Clock } from "lucide-react";
 import dbConnect from "@/lib/db";
 import Webinar from "@/models/Webinar";
 
-// Re-validate every hour
-export const revalidate = 3600;
+export const revalidate = 300; // 5 minutes
 
 async function getUpcomingWebinars() {
     const conn = await dbConnect();

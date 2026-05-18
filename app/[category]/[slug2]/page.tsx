@@ -16,6 +16,7 @@ interface Params {
 }
 
 export const dynamicParams = true;
+export const revalidate = 300; // 5 minutes
 
 export async function generateStaticParams() {
     try {
