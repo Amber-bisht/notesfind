@@ -106,6 +106,8 @@ jobs:
 
             volumes:
               mongodb_data:
+                external: true
+                name: notecom_mongodb_data
             EOF
             
             # Create/Update .env file securely using the envs input
