@@ -8,8 +8,6 @@ import Note from '@/models/Note';
 import { FileText, Eye, ChevronRight, BookOpen, ArrowLeft } from 'lucide-react';
 import { ViewTracker } from '@/components/ViewTracker';
 import { NoteViewer } from '@/components/NoteViewer';
-import { cookies } from 'next/headers';
-import { verifyToken } from '@/lib/auth';
 
 interface Params {
     params: Promise<{ category: string; slug2: string }>;
@@ -211,17 +209,7 @@ async function renderNotePage(note: any) {
     const serializedNote = JSON.parse(JSON.stringify(note));
     const serializedRelated = JSON.parse(JSON.stringify(relatedNotes));
 
-    // Get current user for PDF tracking etc if needed
-    const cookieStore = await cookies();
-    const token = cookieStore.get('token')?.value;
-    let currentUserId = "";
 
-    if (token) {
-        const payload = await verifyToken(token);
-        if (payload) {
-            currentUserId = payload.userId;
-        }
-    }
 
     return (
         <div className="bg-background min-h-screen pb-20">
@@ -251,7 +239,6 @@ async function renderNotePage(note: any) {
                 note={serializedNote}
                 categorySlug={categorySlug}
                 subCategorySlug={subCategorySlug}
-                currentUser={currentUserId}
             />
 
             {/* "More in this topic" Section */}

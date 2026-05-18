@@ -142,10 +142,41 @@ export default function DashboardPage() {
     };
 
     if (loading) return (
-        <div className="min-h-[60vh] flex items-center justify-center">
-            <div className="flex flex-col items-center gap-4">
-                <div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
-                <p className="text-muted-foreground">Loading dashboard...</p>
+        <div className="space-y-8 max-w-6xl mx-auto pb-20 animate-pulse mt-8 px-4 md:px-0">
+            {/* Header Skeleton */}
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 bg-card border rounded-2xl p-6 md:p-8 shadow-sm">
+                <div className="flex items-center gap-4">
+                    <div className="w-16 h-16 rounded-full bg-muted"></div>
+                    <div className="space-y-3">
+                        <div className="h-8 w-48 bg-muted rounded-md"></div>
+                        <div className="h-4 w-64 bg-muted rounded-md"></div>
+                    </div>
+                </div>
+                <div className="h-10 w-24 bg-muted rounded-xl"></div>
+            </div>
+
+            {/* Tabs Skeleton */}
+            <div className="flex border-b gap-4 pb-0">
+                <div className="h-12 w-32 bg-muted rounded-t-md"></div>
+                <div className="h-12 w-32 bg-muted rounded-t-md"></div>
+                <div className="h-12 w-32 bg-muted rounded-t-md"></div>
+                <div className="h-12 w-32 bg-muted rounded-t-md hidden md:block"></div>
+            </div>
+
+            {/* Content Skeleton (Cards) */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 pt-6">
+                {[1, 2, 3, 4, 5, 6].map((i) => (
+                    <div key={i} className="border rounded-xl bg-card overflow-hidden h-[320px] flex flex-col">
+                        <div className="aspect-video w-full bg-muted"></div>
+                        <div className="p-6 space-y-4 flex-1 flex flex-col justify-between">
+                            <div className="space-y-2">
+                                <div className="h-6 w-3/4 bg-muted rounded-md"></div>
+                                <div className="h-4 w-1/2 bg-muted rounded-md"></div>
+                            </div>
+                            <div className="h-4 w-full bg-muted rounded-md mt-auto opacity-50"></div>
+                        </div>
+                    </div>
+                ))}
             </div>
         </div>
     );
@@ -286,7 +317,16 @@ export default function DashboardPage() {
                                                     </h3>
                                                     <p className="text-sm text-muted-foreground">{note.subCategoryId?.name}</p>
                                                 </div>
-                                                <p className="text-sm text-muted-foreground line-clamp-3">{note.content}</p>
+                                                <p className="text-sm text-muted-foreground line-clamp-3">
+                                                    {(() => {
+                                                        const cleanText = note.content
+                                                            .replace(/[#*`_~]/g, '')
+                                                            .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1')
+                                                            .replace(/<[^>]*>/g, '')
+                                                            .replace(/!\[[^\]]*\]\([^)]+\)/g, '');
+                                                        return cleanText.length > 160 ? cleanText.substring(0, 160) + '...' : cleanText;
+                                                    })()}
+                                                </p>
                                             </div>
 
                                             <div className="flex items-center justify-end gap-2 pt-4 border-t mt-auto">
