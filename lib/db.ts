@@ -43,7 +43,7 @@ async function dbConnect() {
     }
 
     // BUILD OPTIMIZATION: Instant fail if we are in the build phase or using a placeholder
-    const isBuildPhase = process.env.NEXT_PHASE === 'phase-production-build' || process.env.NODE_ENV === 'production' && !process.env.MONGODB_URI?.includes('mongodb+srv');
+    const isBuildPhase = process.env.NEXT_PHASE === 'phase-production-build' || process.env.MONGODB_URI?.includes('unused_during_build');
     
     if (isBuildPhase && !cached!.conn) {
         console.warn('=> Skipping DB connection instantly during build phase.');
