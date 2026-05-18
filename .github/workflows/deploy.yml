@@ -106,7 +106,9 @@ jobs:
             EOF
             
             # Create/Update .env file
-            echo "${{ secrets.DOTENV }}" > .env
+            cat << 'ENV_EOF' > .env
+${{ secrets.DOTENV }}
+ENV_EOF
             
             # Pull and Restart
             docker compose pull
