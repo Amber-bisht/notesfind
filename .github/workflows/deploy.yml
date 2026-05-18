@@ -33,6 +33,10 @@ jobs:
         env:
           OWNER: '${{ github.repository_owner }}'
 
+      - name: Extract NEXT_PUBLIC_ variables
+        run: |
+          echo "${{ secrets.DOTENV }}" | grep "^NEXT_PUBLIC_" >> $GITHUB_ENV
+
       - name: Build and push Docker image
         uses: docker/build-push-action@v5
         with:
@@ -41,6 +45,10 @@ jobs:
           tags: ghcr.io/${{ env.OWNER_LC }}/notesfind:latest
           cache-from: type=gha
           cache-to: type=gha,mode=max
+          build-args: |
+            NEXT_PUBLIC_GOOGLE_CLIENT_ID=${{ env.NEXT_PUBLIC_GOOGLE_CLIENT_ID }}
+            NEXT_PUBLIC_APP_URL=${{ env.NEXT_PUBLIC_APP_URL }}
+            NEXT_PUBLIC_CLOUDFLARE_SITE_KEY=${{ env.NEXT_PUBLIC_CLOUDFLARE_SITE_KEY }}
 
   deploy:
     needs: build-and-push
