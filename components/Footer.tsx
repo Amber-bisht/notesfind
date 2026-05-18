@@ -107,7 +107,10 @@ export async function Footer() {
 
                 {/* Bottom Row */}
                 <div className="pt-8 border-t flex flex-col md:flex-row justify-between items-center gap-6 text-sm text-muted-foreground">
-                    <p className="font-medium">&copy; {new Date().getFullYear()} <span className="text-foreground">NotesFind</span>. All rights reserved.</p>
+                    <div className="flex flex-col items-center md:items-start gap-2">
+                        <p className="font-medium">&copy; {new Date().getFullYear()} <span className="text-foreground">NotesFind</span>. All rights reserved.</p>
+                        <p className="font-medium text-xs">This website is managed by <a href="https://amberbisht.me" target="_blank" rel="noopener noreferrer" className="hover:text-primary transition-colors text-foreground">Amber Bisht</a></p>
+                    </div>
                     
                     <div className="flex items-center gap-6">
                         <Link href="/sitemap.xml" className="hover:text-primary transition-colors">Sitemap</Link>
