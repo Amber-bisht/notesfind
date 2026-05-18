@@ -5,6 +5,11 @@ import { ThemeToggle } from "@/components/ThemeToggle";
 import { Logo } from "./Logo";
 
 async function getFooterCategories() {
+    // BUILD OPTIMIZATION: Do not fetch from live API during build
+    if (process.env.NEXT_PHASE === 'phase-production-build' || process.env.MONGODB_URI?.includes('unused_during_build')) {
+        return [];
+    }
+
     try {
         const apiUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
         const res = await fetch(`${apiUrl}/api/categories`, {
