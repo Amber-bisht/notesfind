@@ -93,12 +93,12 @@ export default function DashboardPage() {
             setUser(fullUser);
 
             // 3. If publisher/admin, fetch their created notes
-            if (['admin', 'publisher'].includes(fullUser.role)) {
+            if (['owner', 'co_owner', 'publisher'].includes(fullUser.role)) {
                 const res = await fetch('/api/notes');
                 const data = await res.json();
                 const allNotes = data.notes || [];
 
-                if (fullUser.role === 'admin') {
+                if (fullUser.role === 'owner' || fullUser.role === 'co_owner') {
                     setNotes(allNotes as DashboardNote[]);
                 } else {
                     setNotes((allNotes as DashboardNote[]).filter((n: any) => n.authorId?.email === fullUser.email));
@@ -196,7 +196,7 @@ export default function DashboardPage() {
         </div>
     );
 
-    const canCreate = ['admin', 'publisher'].includes(user.role);
+    const canCreate = ['owner', 'co_owner', 'publisher'].includes(user.role);
 
     return (
         <div className="space-y-8 max-w-6xl mx-auto pb-20">

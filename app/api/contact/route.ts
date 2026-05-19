@@ -89,7 +89,7 @@ async function verifyAdminOrPublisher(req: NextRequest) {
         const decoded = jwt.verify(token, process.env.JWT_SECRET!) as DecodedToken;
         await dbConnect();
         const user = await User.findById(decoded.userId);
-        return user && ['admin', 'publisher'].includes(user.role);
+        return user && ['owner', 'co_owner', 'publisher'].includes(user.role);
     } catch {
         return false;
     }

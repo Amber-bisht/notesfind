@@ -16,7 +16,7 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
         }
 
         const payload = await verifyToken(token);
-        if (!payload || (payload.role !== 'admin' && payload.role !== 'publisher')) {
+        if (!payload || (payload.role !== 'owner' && payload.role !== 'co_owner' && payload.role !== 'publisher')) {
             return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
         }
 
