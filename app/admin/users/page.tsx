@@ -280,7 +280,7 @@ function AdminUsersContent() {
                 {/* Pagination */}
                 <div className="p-6 border-t bg-muted/20 flex items-center justify-between">
                     <p className="text-sm text-muted-foreground">
-                        Showing <span className="font-bold text-foreground">{(page - 1) * 10 + 1}</span> to <span className="font-bold text-foreground">{Math.min(page * 10, (activeTab === "users" ? usersData : logsData)?.pagination.total || 0)}</span> of <span className="font-bold text-foreground">{(activeTab === "users" ? usersData : logsData)?.pagination.total || 0}</span> results
+                        Showing <span className="font-bold text-foreground">{(page - 1) * 20 + 1}</span> to <span className="font-bold text-foreground">{Math.min(page * 20, (activeTab === "users" ? usersData : logsData)?.pagination.total || 0)}</span> of <span className="font-bold text-foreground">{(activeTab === "users" ? usersData : logsData)?.pagination.total || 0}</span> results
                     </p>
                     <div className="flex gap-2">
                         <button
