@@ -80,7 +80,7 @@ export function NoteViewer({ note, categorySlug, subCategorySlug, currentUser }:
                             </div>
                             <div className="flex items-center gap-2">
                                 <Calendar className="w-4 h-4" />
-                                <span>{new Date(note.createdAt).toLocaleDateString()}</span>
+                                <span suppressHydrationWarning>{new Date(note.createdAt).toLocaleDateString()}</span>
                             </div>
                         </div>
                     </div>

@@ -97,7 +97,20 @@ export function NotePDFButton({ contentRef, noteTitle, noteId, noteSlug }: NoteP
             margin: 10,
             filename: `${noteTitle.replace(/[^a-z0-9]/gi, '_').toLowerCase()}.pdf`,
             image: { type: 'jpeg', quality: 0.98 },
-            html2canvas: { scale: 2, useCORS: true },
+            html2canvas: { 
+                scale: 2, 
+                useCORS: true,
+                onclone: (clonedDoc: Document) => {
+                    // Fix for html2canvas crashing on modern CSS color functions (lab, oklch, etc)
+                    const styleTags = clonedDoc.querySelectorAll('style');
+                    styleTags.forEach(style => {
+                        if (style.innerHTML.match(/(oklch|lab|lch|oklab|color)\(/i)) {
+                            // Replace unsupported color functions with a fallback to prevent parser crash
+                            style.innerHTML = style.innerHTML.replace(/(oklch|lab|lch|oklab|color)\([^)]+\)/gi, 'rgba(0,0,0,0.8)');
+                        }
+                    });
+                }
+            },
             jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
         };
 
