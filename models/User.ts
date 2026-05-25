@@ -39,6 +39,7 @@ export interface IUser extends Document {
     country?: string;
     district?: string;
     organization?: string;
+    isBanned?: boolean;
     createdAt: Date;
     updatedAt: Date;
 }
@@ -102,6 +103,10 @@ const UserSchema: Schema<IUser> = new Schema(
             type: String,
             enum: ['none', 'online', 'offline', 'both'],
             default: 'none',
+        },
+        isBanned: {
+            type: Boolean,
+            default: false,
         },
     },
     { timestamps: true }

@@ -22,8 +22,10 @@ export async function GET(req: NextRequest) {
             .select('-password')
             .lean();
 
-        if (!user) {
-            return NextResponse.json({ user: null });
+        if (!user || user.isBanned) {
+            const response = NextResponse.json({ user: null });
+            response.cookies.delete('token');
+            return response;
         }
 
         return NextResponse.json({

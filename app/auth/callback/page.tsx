@@ -33,8 +33,10 @@ function AuthCallbackContent() {
                         router.push('/');
                     }
                 } else {
-                    console.error('Login failed');
-                    router.push('/auth?error=login_failed');
+                    const data = await res.json().catch(() => ({}));
+                    const errorMessage = data.error || 'login_failed';
+                    console.error('Login failed:', errorMessage);
+                    router.push(`/auth?error=${encodeURIComponent(errorMessage)}`);
                 }
             } catch (error) {
                 console.error('Login error', error);

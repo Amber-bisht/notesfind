@@ -22,10 +22,15 @@ export async function verifyGoogleToken(token: string) {
     return ticket.getPayload();
 }
 
-export async function verboseGoogleAuth(code: string) {
+export async function verboseGoogleAuth(code: string, redirectUri: string) {
+    const dynamicClient = new OAuth2Client(
+        GOOGLE_CLIENT_ID,
+        GOOGLE_CLIENT_SECRET,
+        redirectUri
+    );
     // If receiving an Auth Code to exchange
-    const { tokens } = await client.getToken(code);
-    const ticket = await client.verifyIdToken({
+    const { tokens } = await dynamicClient.getToken(code);
+    const ticket = await dynamicClient.verifyIdToken({
         idToken: tokens.id_token!,
         audience: GOOGLE_CLIENT_ID
     });

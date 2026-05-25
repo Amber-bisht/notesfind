@@ -14,7 +14,8 @@ export async function POST(req: NextRequest) {
             return NextResponse.json({ error: 'Missing code' }, { status: 400 });
         }
 
-        const payload = await verboseGoogleAuth(code);
+        const redirectUri = `${req.nextUrl.origin}/auth/callback`;
+        const payload = await verboseGoogleAuth(code, redirectUri);
 
         if (!payload) {
             return NextResponse.json({ error: 'Invalid Google Code' }, { status: 401 });
@@ -38,6 +39,10 @@ export async function POST(req: NextRequest) {
                 image: picture,
                 role: UserRole.USER, // Default role
             });
+        }
+
+        if (user.isBanned) {
+            return NextResponse.json({ error: 'Your account has been banned.' }, { status: 403 });
         }
 
         // Generate JWT

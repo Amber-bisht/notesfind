@@ -12,6 +12,21 @@ interface AdminUser {
     image?: string;
     role: string;
     phone?: string;
+    jobTitle?: string;
+    age?: number;
+    country?: string;
+    district?: string;
+    organization?: string;
+    socials?: {
+        github?: string;
+        twitter?: string;
+        linkedin?: string;
+        instagram?: string;
+        codeforces?: string;
+        leetcode?: string;
+        website?: string;
+    };
+    isBanned?: boolean;
     assignedCategories?: string[];
     webinarAccess?: string;
     createdAt: string;
@@ -59,6 +74,10 @@ function AdminUsersContent() {
     const [selectedUser, setSelectedUser] = useState<AdminUser | null>(null);
     const [isUpdating, setIsUpdating] = useState(false);
 
+    const [currentUser, setCurrentUser] = useState<{ role: string; email: string } | null>(null);
+    const [modalTab, setModalTab] = useState<"profile" | "system" | "socials">("profile");
+    const [modalError, setModalError] = useState<string | null>(null);
+
     const fetchData = useCallback(async () => {
         setLoading(true);
         try {
@@ -81,26 +100,40 @@ function AdminUsersContent() {
         }
     }, [activeTab, page, categories.length]);
 
-    const handleUpdateUser = async (role: string, assignedCategories: string[], webinarAccess: string) => {
-        if (!selectedUser) return;
+    const handleUpdateUser = async (updatedUser: AdminUser) => {
         setIsUpdating(true);
+        setModalError(null);
         try {
             const res = await fetch("/api/admin/users", {
                 method: "PATCH",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
-                    userId: selectedUser._id,
-                    role,
-                    assignedCategories,
-                    webinarAccess
+                    userId: updatedUser._id,
+                    role: updatedUser.role,
+                    assignedCategories: updatedUser.assignedCategories,
+                    webinarAccess: updatedUser.webinarAccess,
+                    name: updatedUser.name,
+                    email: updatedUser.email,
+                    phone: updatedUser.phone,
+                    jobTitle: updatedUser.jobTitle,
+                    age: updatedUser.age ? Number(updatedUser.age) : undefined,
+                    country: updatedUser.country,
+                    district: updatedUser.district,
+                    organization: updatedUser.organization,
+                    socials: updatedUser.socials,
+                    isBanned: updatedUser.isBanned
                 })
             });
             if (res.ok) {
                 fetchData();
                 setSelectedUser(null);
+            } else {
+                const data = await res.json();
+                setModalError(data.error || "Failed to update user");
             }
         } catch (error) {
             console.error("Update user error:", error);
+            setModalError("An error occurred while updating the user");
         } finally {
             setIsUpdating(false);
         }
@@ -109,6 +142,30 @@ function AdminUsersContent() {
     useEffect(() => {
         fetchData();
     }, [fetchData]);
+
+    useEffect(() => {
+        const checkUser = async () => {
+            try {
+                const res = await fetch('/api/auth/me');
+                const data = await res.json();
+                if (data.user) {
+                    setCurrentUser(data.user);
+                }
+            } catch (err) {
+                console.error("Error fetching current user:", err);
+            }
+        };
+        checkUser();
+    }, []);
+
+    useEffect(() => {
+        if (selectedUser) {
+            setModalTab("profile");
+            setModalError(null);
+        }
+    }, [selectedUser]);
+
+    const isOwner = currentUser?.role === 'owner';
 
     return (
         <div className="max-w-6xl mx-auto py-12 px-4 space-y-8">
@@ -160,7 +217,16 @@ function AdminUsersContent() {
                                                             {user.name?.[0]?.toUpperCase()}
                                                         </div>
                                                     )}
-                                                    <span className="font-bold text-sm">{user.name}</span>
+                                                    <div className="flex flex-col">
+                                                        <span className="font-bold text-sm flex items-center gap-2">
+                                                            {user.name}
+                                                            {user.isBanned && (
+                                                                <span className="px-1.5 py-0.5 rounded text-[8px] font-black uppercase tracking-wider bg-red-500 text-white animate-pulse">
+                                                                    Banned
+                                                                </span>
+                                                            )}
+                                                        </span>
+                                                    </div>
                                                 </div>
                                             </td>
                                             <td className="px-6 py-4">
@@ -201,7 +267,7 @@ function AdminUsersContent() {
                                                 {new Date(user.createdAt).toLocaleDateString()}
                                             </td>
                                             <td className="px-6 py-4">
-                                                {user.role !== 'owner' && (
+                                                {user.role !== 'owner' && isOwner && (
                                                     <button
                                                         onClick={() => setSelectedUser(user)}
                                                         className="text-xs font-bold hover:underline text-primary"
@@ -307,7 +373,14 @@ function AdminUsersContent() {
                     <div className="bg-card border shadow-2xl rounded-3xl w-full max-w-lg overflow-hidden flex flex-col animate-in fade-in zoom-in duration-200">
                         <div className="p-6 border-b flex justify-between items-center bg-muted/30">
                             <div>
-                                <h2 className="text-xl font-black">Manage User</h2>
+                                <h2 className="text-xl font-black flex items-center gap-2">
+                                    Manage User
+                                    {selectedUser.isBanned && (
+                                        <span className="px-1.5 py-0.5 rounded text-[8px] font-black uppercase tracking-wider bg-red-500 text-white">
+                                            Banned
+                                        </span>
+                                    )}
+                                </h2>
                                 <p className="text-xs text-muted-foreground">{selectedUser.email}</p>
                             </div>
                             <button onClick={() => setSelectedUser(null)} className="p-2 hover:bg-muted rounded-full transition-colors">
@@ -315,75 +388,244 @@ function AdminUsersContent() {
                             </button>
                         </div>
 
-                        <div className="p-6 space-y-6 overflow-y-auto max-h-[70vh]">
-                            {/* Role Selection */}
-                            <div className="space-y-3">
-                                <label className="text-sm font-bold uppercase tracking-wider text-muted-foreground">System Role</label>
-                                <div className="grid grid-cols-2 gap-2">
-                                    {['co_owner', 'publisher', 'user'].map((r) => (
-                                        <button
-                                            key={r}
-                                            onClick={() => setSelectedUser({ ...selectedUser, role: r })}
-                                            className={`px-4 py-3 rounded-xl border text-sm font-bold transition-all capitalize ${selectedUser.role === r ? 'bg-primary text-primary-foreground border-primary shadow-lg scale-[0.98]' : 'hover:bg-muted'}`}
-                                        >
-                                            {r.replace('_', ' ')}
-                                        </button>
-                                    ))}
-                                </div>
-                            </div>
+                        {/* Modal Sub-Tabs */}
+                        <div className="flex border-b text-[10px] font-bold uppercase tracking-wider bg-muted/20 px-6">
+                            <button 
+                                onClick={() => setModalTab("profile")} 
+                                className={`px-4 py-3 border-b-2 transition-all ${modalTab === "profile" ? "border-primary text-primary" : "border-transparent text-muted-foreground hover:text-foreground"}`}
+                            >
+                                Profile Info
+                            </button>
+                            <button 
+                                onClick={() => setModalTab("system")} 
+                                className={`px-4 py-3 border-b-2 transition-all ${modalTab === "system" ? "border-primary text-primary" : "border-transparent text-muted-foreground hover:text-foreground"}`}
+                            >
+                                System & Access
+                            </button>
+                            <button 
+                                onClick={() => setModalTab("socials")} 
+                                className={`px-4 py-3 border-b-2 transition-all ${modalTab === "socials" ? "border-primary text-primary" : "border-transparent text-muted-foreground hover:text-foreground"}`}
+                            >
+                                Social Profiles
+                            </button>
+                        </div>
 
-                            {/* Category Allotment */}
-                            {(selectedUser.role === 'publisher' || selectedUser.role === 'co_owner') && (
-                                <div className="space-y-3 pt-4 border-t">
-                                    <label className="text-sm font-bold uppercase tracking-wider text-muted-foreground">
-                                        Assign Categories
-                                        <span className="block text-[10px] font-medium normal-case text-muted-foreground/70">
-                                            {selectedUser.role === 'co_owner' ? 'Co-owners have full access to these categories' : 'Publishers can only manage notes in these categories'}
-                                        </span>
-                                    </label>
-                                    <div className="grid grid-cols-1 gap-1.5 max-h-48 overflow-y-auto p-1">
-                                        {categories.map((cat) => (
-                                            <button
-                                                key={cat._id}
-                                                onClick={() => {
-                                                    const current = selectedUser.assignedCategories || [];
-                                                    const updated = current.includes(cat._id)
-                                                        ? current.filter(id => id !== cat._id)
-                                                        : [...current, cat._id];
-                                                    setSelectedUser({ ...selectedUser, assignedCategories: updated });
-                                                }}
-                                                className={`flex items-center justify-between p-3 rounded-xl border text-sm font-medium transition-all ${selectedUser.assignedCategories?.includes(cat._id) ? 'bg-primary/5 border-primary/30 text-primary' : 'hover:bg-muted'}`}
-                                            >
-                                                {cat.name}
-                                                {selectedUser.assignedCategories?.includes(cat._id) && <Check className="w-4 h-4" />}
-                                            </button>
-                                        ))}
+                        {/* Modal Body */}
+                        <div className="p-6 space-y-6 overflow-y-auto max-h-[60vh]">
+                            {modalError && (
+                                <div className="p-3.5 rounded-xl text-xs font-bold bg-red-500/10 border border-red-500/20 text-red-500">
+                                    {modalError}
+                                </div>
+                            )}
+
+                            {modalTab === "profile" && (
+                                <div className="space-y-4">
+                                    <div className="grid grid-cols-2 gap-4">
+                                        <div className="space-y-1">
+                                            <label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Full Name</label>
+                                            <input 
+                                                type="text" 
+                                                value={selectedUser.name || ""} 
+                                                onChange={(e) => setSelectedUser({ ...selectedUser, name: e.target.value })}
+                                                className="w-full px-3 py-2 text-sm border rounded-xl bg-background focus:outline-none focus:ring-2 focus:ring-primary/20"
+                                            />
+                                        </div>
+                                        <div className="space-y-1">
+                                            <label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Email Address</label>
+                                            <input 
+                                                type="email" 
+                                                value={selectedUser.email || ""} 
+                                                onChange={(e) => setSelectedUser({ ...selectedUser, email: e.target.value })}
+                                                className="w-full px-3 py-2 text-sm border rounded-xl bg-background focus:outline-none focus:ring-2 focus:ring-primary/20"
+                                            />
+                                        </div>
+                                    </div>
+                                    <div className="grid grid-cols-2 gap-4">
+                                        <div className="space-y-1">
+                                            <label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Phone Number</label>
+                                            <input 
+                                                type="text" 
+                                                value={selectedUser.phone || ""} 
+                                                onChange={(e) => setSelectedUser({ ...selectedUser, phone: e.target.value })}
+                                                className="w-full px-3 py-2 text-sm border rounded-xl bg-background focus:outline-none focus:ring-2 focus:ring-primary/20"
+                                                placeholder="+91..."
+                                            />
+                                        </div>
+                                        <div className="space-y-1">
+                                            <label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Age</label>
+                                            <input 
+                                                type="number" 
+                                                value={selectedUser.age || ""} 
+                                                onChange={(e) => setSelectedUser({ ...selectedUser, age: e.target.value ? Number(e.target.value) : undefined })}
+                                                className="w-full px-3 py-2 text-sm border rounded-xl bg-background focus:outline-none focus:ring-2 focus:ring-primary/20"
+                                            />
+                                        </div>
+                                    </div>
+                                    <div className="grid grid-cols-2 gap-4">
+                                        <div className="space-y-1">
+                                            <label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Job Title</label>
+                                            <input 
+                                                type="text" 
+                                                value={selectedUser.jobTitle || ""} 
+                                                onChange={(e) => setSelectedUser({ ...selectedUser, jobTitle: e.target.value })}
+                                                className="w-full px-3 py-2 text-sm border rounded-xl bg-background focus:outline-none focus:ring-2 focus:ring-primary/20"
+                                                placeholder="Software Engineer"
+                                            />
+                                        </div>
+                                        <div className="space-y-1">
+                                            <label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Organization</label>
+                                            <input 
+                                                type="text" 
+                                                value={selectedUser.organization || ""} 
+                                                onChange={(e) => setSelectedUser({ ...selectedUser, organization: e.target.value })}
+                                                className="w-full px-3 py-2 text-sm border rounded-xl bg-background focus:outline-none focus:ring-2 focus:ring-primary/20"
+                                                placeholder="Company/College"
+                                            />
+                                        </div>
+                                    </div>
+                                    <div className="grid grid-cols-2 gap-4">
+                                        <div className="space-y-1">
+                                            <label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Country</label>
+                                            <input 
+                                                type="text" 
+                                                value={selectedUser.country || ""} 
+                                                onChange={(e) => setSelectedUser({ ...selectedUser, country: e.target.value })}
+                                                className="w-full px-3 py-2 text-sm border rounded-xl bg-background focus:outline-none focus:ring-2 focus:ring-primary/20"
+                                            />
+                                        </div>
+                                        <div className="space-y-1">
+                                            <label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">District / State</label>
+                                            <input 
+                                                type="text" 
+                                                value={selectedUser.district || ""} 
+                                                onChange={(e) => setSelectedUser({ ...selectedUser, district: e.target.value })}
+                                                className="w-full px-3 py-2 text-sm border rounded-xl bg-background focus:outline-none focus:ring-2 focus:ring-primary/20"
+                                            />
+                                        </div>
                                     </div>
                                 </div>
                             )}
 
-                            {/* Webinar Access */}
-                            {(selectedUser.role === 'co_owner' || selectedUser.role === 'publisher') && (
-                                <div className="space-y-3 pt-4 border-t">
-                                    <label className="text-sm font-bold uppercase tracking-wider text-muted-foreground">
-                                        Webinar Access
-                                        <span className="block text-[10px] font-medium normal-case text-muted-foreground/70">
-                                            Choose which webinar types this user can create and manage
-                                        </span>
-                                    </label>
-                                    <div className="grid grid-cols-2 gap-2">
-                                        {(['none', 'online', 'offline', 'both'] as const).map((opt) => (
+                            {modalTab === "system" && (
+                                <div className="space-y-6">
+                                    {/* Account Status / Ban Control */}
+                                    <div className="p-4 rounded-2xl border border-red-500/20 bg-red-500/5 space-y-3">
+                                        <div className="flex justify-between items-center">
+                                            <div>
+                                                <h4 className="text-sm font-bold text-red-500">Ban Account</h4>
+                                                <p className="text-xs text-muted-foreground">Prevent this user from logging in and terminate all active sessions.</p>
+                                            </div>
                                             <button
-                                                key={opt}
-                                                onClick={() => setSelectedUser({ ...selectedUser, webinarAccess: opt })}
-                                                className={`p-3 rounded-xl border text-sm font-medium transition-all capitalize ${
-                                                    (selectedUser.webinarAccess || 'none') === opt
-                                                        ? 'bg-primary/5 border-primary/30 text-primary'
-                                                        : 'hover:bg-muted'
+                                                type="button"
+                                                onClick={() => setSelectedUser({ ...selectedUser, isBanned: !selectedUser.isBanned })}
+                                                className={`px-4 py-2 rounded-xl text-xs font-black uppercase tracking-wider transition-colors border ${
+                                                    selectedUser.isBanned 
+                                                    ? "bg-red-500 text-white border-red-500 hover:bg-red-600" 
+                                                    : "bg-transparent text-red-500 border-red-500 hover:bg-red-500 hover:text-white"
                                                 }`}
                                             >
-                                                {opt === 'none' ? '🚫 None' : opt === 'online' ? '🌐 Online' : opt === 'offline' ? '📍 Offline' : '✅ Both'}
+                                                {selectedUser.isBanned ? "🚫 Banned (Click to Unban)" : "Ban User"}
                                             </button>
+                                        </div>
+                                    </div>
+
+                                    {/* Role Selection */}
+                                    <div className="space-y-3">
+                                        <label className="text-sm font-bold uppercase tracking-wider text-muted-foreground">System Role</label>
+                                        <div className="grid grid-cols-3 gap-2">
+                                            {['co_owner', 'publisher', 'user'].map((r) => (
+                                                <button
+                                                    key={r}
+                                                    type="button"
+                                                    onClick={() => setSelectedUser({ ...selectedUser, role: r })}
+                                                    className={`px-3 py-2.5 rounded-xl border text-xs font-bold transition-all capitalize ${selectedUser.role === r ? 'bg-primary text-primary-foreground border-primary shadow-md' : 'hover:bg-muted bg-background'}`}
+                                                >
+                                                    {r.replace('_', ' ')}
+                                                </button>
+                                            ))}
+                                        </div>
+                                    </div>
+
+                                    {/* Category Allotment */}
+                                    {(selectedUser.role === 'publisher' || selectedUser.role === 'co_owner') && (
+                                        <div className="space-y-3 pt-4 border-t">
+                                            <label className="text-sm font-bold uppercase tracking-wider text-muted-foreground">
+                                                Assign Categories
+                                                <span className="block text-[10px] font-medium normal-case text-muted-foreground/70">
+                                                    {selectedUser.role === 'co_owner' ? 'Co-owners have full access to these categories' : 'Publishers can only manage notes in these categories'}
+                                                </span>
+                                            </label>
+                                            <div className="grid grid-cols-1 gap-1.5 max-h-36 overflow-y-auto p-1 border rounded-xl bg-background/50">
+                                                {categories.map((cat) => (
+                                                    <button
+                                                        key={cat._id}
+                                                        type="button"
+                                                        onClick={() => {
+                                                            const current = selectedUser.assignedCategories || [];
+                                                            const updated = current.includes(cat._id)
+                                                                ? current.filter(id => id !== cat._id)
+                                                                : [...current, cat._id];
+                                                            setSelectedUser({ ...selectedUser, assignedCategories: updated });
+                                                        }}
+                                                        className={`flex items-center justify-between p-2 rounded-lg border text-xs font-medium transition-all ${selectedUser.assignedCategories?.includes(cat._id) ? 'bg-primary/5 border-primary/30 text-primary' : 'hover:bg-muted'}`}
+                                                    >
+                                                        {cat.name}
+                                                        {selectedUser.assignedCategories?.includes(cat._id) && <Check className="w-3.5 h-3.5" />}
+                                                    </button>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    )}
+
+                                    {/* Webinar Access */}
+                                    {(selectedUser.role === 'co_owner' || selectedUser.role === 'publisher') && (
+                                        <div className="space-y-3 pt-4 border-t">
+                                            <label className="text-sm font-bold uppercase tracking-wider text-muted-foreground">
+                                                Webinar Access
+                                                <span className="block text-[10px] font-medium normal-case text-muted-foreground/70">
+                                                    Choose which webinar types this user can create and manage
+                                                </span>
+                                            </label>
+                                            <div className="grid grid-cols-2 gap-2">
+                                                {(['none', 'online', 'offline', 'both'] as const).map((opt) => (
+                                                    <button
+                                                        key={opt}
+                                                        type="button"
+                                                        onClick={() => setSelectedUser({ ...selectedUser, webinarAccess: opt })}
+                                                        className={`p-2.5 rounded-xl border text-xs font-medium transition-all capitalize ${(selectedUser.webinarAccess || 'none') === opt ? 'bg-primary/5 border-primary/30 text-primary' : 'hover:bg-muted bg-background'}`}
+                                                    >
+                                                        {opt === 'none' ? '🚫 None' : opt === 'online' ? '🌐 Online' : opt === 'offline' ? '📍 Offline' : '✅ Both'}
+                                                    </button>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    )}
+                                </div>
+                            )}
+
+                            {modalTab === "socials" && (
+                                <div className="space-y-4">
+                                    <div className="grid grid-cols-2 gap-4">
+                                        {['github', 'twitter', 'linkedin', 'instagram', 'codeforces', 'leetcode', 'website'].map((platform) => (
+                                            <div key={platform} className="space-y-1">
+                                                <label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground capitalize">{platform}</label>
+                                                <input 
+                                                    type="text" 
+                                                    value={selectedUser.socials?.[platform as keyof typeof selectedUser.socials] || ""} 
+                                                    onChange={(e) => {
+                                                        const currentSocials = selectedUser.socials || {};
+                                                        setSelectedUser({
+                                                            ...selectedUser,
+                                                            socials: {
+                                                                ...currentSocials,
+                                                                [platform]: e.target.value
+                                                            }
+                                                        });
+                                                    }}
+                                                    className="w-full px-3 py-2 text-sm border rounded-xl bg-background focus:outline-none focus:ring-2 focus:ring-primary/20"
+                                                    placeholder={`${platform} URL or handle`}
+                                                />
+                                            </div>
                                         ))}
                                     </div>
                                 </div>
@@ -398,7 +640,7 @@ function AdminUsersContent() {
                                 Cancel
                             </button>
                             <button
-                                onClick={() => handleUpdateUser(selectedUser.role, selectedUser.assignedCategories || [], selectedUser.webinarAccess || 'none')}
+                                onClick={() => handleUpdateUser(selectedUser)}
                                 disabled={isUpdating}
                                 className="flex-1 px-6 py-3 rounded-xl font-bold bg-primary text-primary-foreground shadow-lg shadow-primary/20 hover:opacity-90 transition-all disabled:opacity-50"
                             >

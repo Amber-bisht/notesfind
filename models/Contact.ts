@@ -6,6 +6,9 @@ export interface IContact extends Document {
     message: string;
     referenceLink?: string;
     tag: 'Copyright' | 'Bug' | 'General' | 'Feedback';
+    replied?: boolean;
+    repliedAt?: Date;
+    replyMessage?: string;
     createdAt: Date;
     updatedAt: Date;
 }
@@ -32,6 +35,16 @@ const ContactSchema: Schema<IContact> = new Schema(
             type: String,
             enum: ['Copyright', 'Bug', 'General', 'Feedback'],
             default: 'General',
+        },
+        replied: {
+            type: Boolean,
+            default: false,
+        },
+        repliedAt: {
+            type: Date,
+        },
+        replyMessage: {
+            type: String,
         },
     },
     { timestamps: true }

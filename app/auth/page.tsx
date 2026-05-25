@@ -1,15 +1,32 @@
 "use client";
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, Suspense } from 'react';
 import Image from 'next/image';
+import { useSearchParams } from 'next/navigation';
 
-export default function AuthPage() {
+function AuthContent() {
     const [mounted, setMounted] = useState(false);
+    const searchParams = useSearchParams();
+    const errorParam = searchParams.get('error');
+    const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
     useEffect(() => {
-        // eslint-disable-next-line react-hooks/set-state-in-effect
         setMounted(true);
     }, []);
+
+    useEffect(() => {
+        if (errorParam) {
+            if (errorParam === 'Your account has been banned.') {
+                setErrorMsg("You are banned, bitch!");
+            } else if (errorParam === 'login_failed') {
+                setErrorMsg("Login failed. Please try again.");
+            } else if (errorParam === 'login_error') {
+                setErrorMsg("An error occurred during login. Please try again.");
+            } else {
+                setErrorMsg(errorParam);
+            }
+        }
+    }, [errorParam]);
 
     const handleGoogleLogin = () => {
         const clientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || 'YOUR_CLIENT_ID'; // Ideally from env
@@ -37,6 +54,12 @@ export default function AuthPage() {
                 <p className="text-muted-foreground">Sign in to access your notes and dashboard.</p>
             </div>
 
+            {errorMsg && (
+                <div className="p-4 border border-red-500/20 bg-red-500/10 text-red-500 text-sm font-bold rounded-xl max-w-sm w-full text-center">
+                    {errorMsg}
+                </div>
+            )}
+
             <div className="p-8 border rounded-xl bg-card shadow-sm w-full max-w-sm">
                 <button
                     onClick={handleGoogleLogin}
@@ -47,5 +70,20 @@ export default function AuthPage() {
                 </button>
             </div>
         </div>
+    );
+}
+
+export default function AuthPage() {
+    return (
+        <Suspense fallback={
+            <div className="flex items-center justify-center min-h-[60vh]">
+                <div className="flex flex-col items-center gap-4">
+                    <div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
+                    <p className="text-muted-foreground">Loading...</p>
+                </div>
+            </div>
+        }>
+            <AuthContent />
+        </Suspense>
     );
 }
