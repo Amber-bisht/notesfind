@@ -35,7 +35,9 @@ jobs:
 
       - name: Extract NEXT_PUBLIC_ variables
         run: |
-          echo "${{ secrets.DOTENV }}" | grep "^NEXT_PUBLIC_" >> $GITHUB_ENV
+          echo "$DOTENV_CONTENT" | grep "^NEXT_PUBLIC_" >> $GITHUB_ENV
+        env:
+          DOTENV_CONTENT: ${{ secrets.DOTENV }}
 
       - name: Build and push Docker image
         uses: docker/build-push-action@v5
@@ -49,6 +51,7 @@ jobs:
             NEXT_PUBLIC_GOOGLE_CLIENT_ID=${{ env.NEXT_PUBLIC_GOOGLE_CLIENT_ID }}
             NEXT_PUBLIC_APP_URL=${{ env.NEXT_PUBLIC_APP_URL }}
             NEXT_PUBLIC_CLOUDFLARE_SITE_KEY=${{ env.NEXT_PUBLIC_CLOUDFLARE_SITE_KEY }}
+            NEXT_PUBLIC_GOOGLE_REDIRECT_URI=${{ env.NEXT_PUBLIC_GOOGLE_REDIRECT_URI }}
 
   deploy:
     needs: build-and-push
