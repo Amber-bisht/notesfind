@@ -30,7 +30,7 @@ function AuthContent() {
 
     const handleGoogleLogin = () => {
         const clientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || 'YOUR_CLIENT_ID'; // Ideally from env
-        const redirectUri = typeof window !== 'undefined' ? `${window.location.origin}/auth/callback` : '';
+        const redirectUri = process.env.NEXT_PUBLIC_GOOGLE_REDIRECT_URI || (typeof window !== 'undefined' ? `${window.location.origin}/auth/callback` : '');
         const scope = 'openid email profile';
         const responseType = 'code';
 

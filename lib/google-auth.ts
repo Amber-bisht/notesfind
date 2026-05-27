@@ -3,9 +3,9 @@ import { OAuth2Client } from 'google-auth-library';
 const GOOGLE_CLIENT_ID = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID;
 const GOOGLE_CLIENT_SECRET = process.env.GOOGLE_CLIENT_SECRET;
 
-const REDIRECT_URI = process.env.NEXT_PUBLIC_APP_URL
+const REDIRECT_URI = process.env.NEXT_PUBLIC_GOOGLE_REDIRECT_URI || (process.env.NEXT_PUBLIC_APP_URL
     ? `${process.env.NEXT_PUBLIC_APP_URL}/auth/callback`
-    : 'http://localhost:3000/auth/callback';
+    : 'http://localhost:3000/auth/callback');
 
 const client = new OAuth2Client(
     GOOGLE_CLIENT_ID,

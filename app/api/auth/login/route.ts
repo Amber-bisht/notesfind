@@ -14,7 +14,7 @@ export async function POST(req: NextRequest) {
             return NextResponse.json({ error: 'Missing code' }, { status: 400 });
         }
 
-        const redirectUri = `${req.nextUrl.origin}/auth/callback`;
+        const redirectUri = process.env.NEXT_PUBLIC_GOOGLE_REDIRECT_URI || `${req.nextUrl.origin}/auth/callback`;
         const payload = await verboseGoogleAuth(code, redirectUri);
 
         if (!payload) {
