@@ -47,13 +47,13 @@ function AuthContent() {
             if (res.ok) {
                 const data = await res.json();
                 
-                // Determine redirect path
+                // Determine redirect path and perform a full page redirect to sync auth state
                 if (redirectParam) {
-                    router.push(redirectParam);
+                    window.location.href = redirectParam;
                 } else if (data.user.role === 'owner' || data.user.role === 'co_owner' || data.user.role === 'publisher') {
-                    router.push('/dashboard');
+                    window.location.href = '/dashboard';
                 } else {
-                    router.push('/');
+                    window.location.href = '/';
                 }
             } else {
                 const data = await res.json().catch(() => ({}));
