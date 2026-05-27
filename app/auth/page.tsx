@@ -2,13 +2,16 @@
 
 import { useEffect, useState, Suspense } from 'react';
 import Image from 'next/image';
-import { useSearchParams } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 
 function AuthContent() {
     const [mounted, setMounted] = useState(false);
+    const router = useRouter();
     const searchParams = useSearchParams();
     const errorParam = searchParams.get('error');
+    const redirectParam = searchParams.get('redirect');
     const [errorMsg, setErrorMsg] = useState<string | null>(null);
+    const [loading, setLoading] = useState(false);
 
     useEffect(() => {
         setMounted(true);
@@ -28,22 +31,107 @@ function AuthContent() {
         }
     }, [errorParam]);
 
-    const handleGoogleLogin = () => {
-        const clientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || 'YOUR_CLIENT_ID'; // Ideally from env
-        const redirectUri = process.env.NEXT_PUBLIC_GOOGLE_REDIRECT_URI || (typeof window !== 'undefined' ? `${window.location.origin}/auth/callback` : '');
-        const scope = 'openid email profile';
-        const responseType = 'code';
+    // Handle Popup Credential (ID Token)
+    const handleCredentialResponse = async (response: any) => {
+        setLoading(true);
+        setErrorMsg(null);
+        try {
+            const res = await fetch('/api/auth/login', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ idToken: response.credential }),
+            });
 
-        // Check if we have env var, if not show alert (for dev)
-        if (clientId === 'YOUR_CLIENT_ID') {
-            alert('Please set NEXT_PUBLIC_GOOGLE_CLIENT_ID in .env.local');
-            return;
+            if (res.ok) {
+                const data = await res.json();
+                
+                // Determine redirect path
+                if (redirectParam) {
+                    router.push(redirectParam);
+                } else if (data.user.role === 'owner' || data.user.role === 'co_owner' || data.user.role === 'publisher') {
+                    router.push('/dashboard');
+                } else {
+                    router.push('/');
+                }
+            } else {
+                const data = await res.json().catch(() => ({}));
+                const errorMessage = data.error || 'login_failed';
+                setErrorMsg(errorMessage === 'Your account has been banned.' ? "You are banned, bitch!" : errorMessage);
+            }
+        } catch (error) {
+            console.error('Authentication Error:', error);
+            setErrorMsg("An error occurred during login. Please try again.");
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    useEffect(() => {
+        if (!mounted) return;
+
+        // Load the Google GSI script dynamically
+        const scriptId = "google-gsi-client";
+        let script = document.getElementById(scriptId) as HTMLScriptElement;
+
+        const initializeGSI = () => {
+            const clientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID;
+            if (!clientId) {
+                console.error("Missing NEXT_PUBLIC_GOOGLE_CLIENT_ID");
+                return;
+            }
+
+            // @ts-ignore
+            window.google?.accounts.id.initialize({
+                client_id: clientId,
+                callback: handleCredentialResponse,
+                auto_select: false,
+                cancel_on_tap_outside: true,
+            });
+
+            const buttonDiv = document.getElementById("google-signin-button");
+            if (buttonDiv) {
+                // @ts-ignore
+                window.google?.accounts.id.renderButton(buttonDiv, {
+                    type: "standard",
+                    theme: "outline",
+                    size: "large",
+                    text: "continue_with",
+                    shape: "rectangular",
+                    logo_alignment: "left",
+                    width: buttonDiv.clientWidth || 320,
+                });
+            }
+
+            // Optionally prompt One Tap
+            // @ts-ignore
+            window.google?.accounts.id.prompt();
+        };
+
+        if (!script) {
+            script = document.createElement("script");
+            script.src = "https://accounts.google.com/gsi/client";
+            script.id = scriptId;
+            script.async = true;
+            script.defer = true;
+            document.body.appendChild(script);
+            script.onload = initializeGSI;
+        } else {
+            // @ts-ignore
+            if (window.google) {
+                initializeGSI();
+            } else {
+                script.onload = initializeGSI;
+            }
         }
 
-        const authUrl = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${clientId}&redirect_uri=${encodeURIComponent(redirectUri)}&scope=${encodeURIComponent(scope)}&response_type=${responseType}&access_type=offline&prompt=consent`;
-
-        window.location.href = authUrl;
-    };
+        return () => {
+            // Cleanup one-tap overlay if user leaves the page
+            // @ts-ignore
+            window.google?.accounts.id.cancel();
+        };
+    }, [mounted]);
 
     if (!mounted) return null;
 
@@ -60,14 +148,18 @@ function AuthContent() {
                 </div>
             )}
 
-            <div className="p-8 border rounded-xl bg-card shadow-sm w-full max-w-sm">
-                <button
-                    onClick={handleGoogleLogin}
-                    className="w-full flex items-center justify-center gap-3 bg-white text-gray-900 border border-gray-300 hover:bg-gray-50 font-medium py-3 px-4 rounded-lg transition-colors shadow-sm"
-                >
-                    <Image src="https://www.svgrepo.com/show/475656/google-color.svg" alt="Google" width={20} height={20} className="w-5 h-5" />
-                    Continue with Google
-                </button>
+            <div className="p-8 border rounded-xl bg-card shadow-sm w-full max-w-sm flex flex-col items-center justify-center min-h-[140px]">
+                {loading ? (
+                    <div className="flex flex-col items-center gap-3">
+                        <div className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin"></div>
+                        <p className="text-xs text-muted-foreground">Authenticating...</p>
+                    </div>
+                ) : (
+                    <div 
+                        id="google-signin-button" 
+                        className="w-full flex justify-center min-h-[44px]"
+                    ></div>
+                )}
             </div>
         </div>
     );

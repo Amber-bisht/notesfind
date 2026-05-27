@@ -99,6 +99,7 @@ jobs:
               
               mongodb:
                 image: mongo:latest
+                command: mongod --auth
                 volumes:
                   - mongodb_data:/data/db
                 restart: always
