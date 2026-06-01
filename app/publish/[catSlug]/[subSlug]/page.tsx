@@ -25,11 +25,11 @@ import { CSS } from "@dnd-kit/utilities";
 
 import { NoteForm } from "@/components/NoteForm";
 
-function Modal({ isOpen, onClose, title, children }: { isOpen: boolean, onClose: () => void, title: string, children: React.ReactNode }) {
+function Modal({ isOpen, onClose, title, children, className = "max-w-2xl" }: { isOpen: boolean, onClose: () => void, title: string, children: React.ReactNode, className?: string }) {
     if (!isOpen) return null;
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
-            <div className="bg-card w-full max-w-2xl rounded-2xl shadow-xl overflow-hidden flex flex-col max-h-[90vh]">
+            <div className={`bg-card w-full ${className} rounded-2xl shadow-xl overflow-hidden flex flex-col max-h-[90vh]`}>
                 <div className="flex items-center justify-between p-4 md:p-6 border-b">
                     <h2 className="text-xl font-bold">{title}</h2>
                     <button onClick={onClose} className="p-2 rounded-full hover:bg-muted text-muted-foreground transition-colors">
@@ -223,7 +223,7 @@ export default function PublishNotesPage({ params }: { params: Promise<{ catSlug
             </div>
 
             {/* MODAL */}
-            <Modal isOpen={isNoteModalOpen} onClose={() => setIsNoteModalOpen(false)} title={editingNoteData?._id ? "Edit Note" : "Create Note"}>
+            <Modal isOpen={isNoteModalOpen} onClose={() => setIsNoteModalOpen(false)} title={editingNoteData?._id ? "Edit Note" : "Create Note"} className="max-w-7xl">
                 {isNoteModalOpen && (
                     <NoteForm
                         initialData={editingNoteData}
