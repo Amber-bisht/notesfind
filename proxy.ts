@@ -8,6 +8,15 @@ import { verifyToken } from '@/lib/auth';
 // and apply the heavy Redis limiting specifically to API routes to avoid slowing down static assets.
 
 export default async function proxy(request: NextRequest) {
+    const host = request.headers.get('host') || '';
+    
+    // Redirect www.notesfind.com to notesfind.com
+    if (host.startsWith('www.')) {
+        const nonWwwHost = host.replace(/^www\./, '');
+        const newUrl = new URL(request.nextUrl.pathname + request.nextUrl.search, `https://${nonWwwHost}`);
+        return NextResponse.redirect(newUrl, 301);
+    }
+
     const path = request.nextUrl.pathname;
     const ip = request.headers.get('x-forwarded-for') || 'local';
 
@@ -58,9 +67,14 @@ export default async function proxy(request: NextRequest) {
 
 export const config = {
     matcher: [
-        '/api/:path*',
-        '/admin/:path*', 
-        '/dashboard/:path*', 
-        '/publish/:path*'
+        /*
+         * Match all request paths except for:
+         * - _next/static (static files)
+         * - _next/image (image optimization files)
+         * - favicon.ico (favicon file)
+         * - fonts (fonts folder)
+         * - static image/asset extensions
+         */
+        '/((?!_next/static|_next/image|favicon.ico|fonts|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
     ],
 };
