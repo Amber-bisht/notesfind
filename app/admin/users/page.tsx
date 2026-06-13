@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, Suspense, useCallback } from "react";
-import { ChevronLeft, ChevronRight, Clock, Mail, X, Check } from "lucide-react";
+import { ChevronLeft, ChevronRight, Clock, Mail, X, Check, Search, Users } from "lucide-react";
 import Image from "next/image";
 import { useSearchParams } from "next/navigation";
 
@@ -77,15 +77,24 @@ function AdminUsersContent() {
     const [currentUser, setCurrentUser] = useState<{ role: string; email: string } | null>(null);
     const [modalTab, setModalTab] = useState<"profile" | "system" | "socials">("profile");
     const [modalError, setModalError] = useState<string | null>(null);
+    const [roleFilter, setRoleFilter] = useState<string>("all");
+    const [searchQuery, setSearchQuery] = useState("");
 
     const fetchData = useCallback(async () => {
         setLoading(true);
         try {
-            const endpoint = activeTab === "users" ? "/api/admin/users" : "/api/admin/logs";
-            const res = await fetch(`${endpoint}?page=${page}&limit=20`);
-            const data = await res.json();
-            if (activeTab === "users") setUsersData(data);
-            else setLogsData(data);
+            if (activeTab === "users") {
+                const params = new URLSearchParams({ page: String(page), limit: "20" });
+                if (roleFilter !== "all") params.set("role", roleFilter);
+                if (searchQuery.trim()) params.set("search", searchQuery.trim());
+                const res = await fetch(`/api/admin/users?${params}`);
+                const data = await res.json();
+                setUsersData(data);
+            } else {
+                const res = await fetch(`/api/admin/logs?page=${page}&limit=20`);
+                const data = await res.json();
+                setLogsData(data);
+            }
 
             // Fetch categories if not loaded
             if (categories.length === 0) {
@@ -98,7 +107,7 @@ function AdminUsersContent() {
         } finally {
             setLoading(false);
         }
-    }, [activeTab, page, categories.length]);
+    }, [activeTab, page, categories.length, roleFilter, searchQuery]);
 
     const handleUpdateUser = async (updatedUser: AdminUser) => {
         setIsUpdating(true);
@@ -143,6 +152,11 @@ function AdminUsersContent() {
         fetchData();
     }, [fetchData]);
 
+    // Reset to page 1 when filter or search changes
+    useEffect(() => {
+        setPage(1);
+    }, [roleFilter, searchQuery, activeTab]);
+
     useEffect(() => {
         const checkUser = async () => {
             try {
@@ -179,7 +193,7 @@ function AdminUsersContent() {
                         onClick={() => { setActiveTab("users"); setPage(1); }}
                         className={`px-6 py-2 rounded-lg text-sm font-bold transition-all ${activeTab === "users" ? "bg-background shadow-sm" : "hover:bg-background/50"}`}
                     >
-                        Users
+                        <Users className="w-4 h-4 inline mr-1.5" />Users
                     </button>
                     <button
                         onClick={() => { setActiveTab("logs"); setPage(1); }}
@@ -191,6 +205,53 @@ function AdminUsersContent() {
             </div>
 
             <div className="bg-card border rounded-3xl shadow-xl overflow-hidden min-h-[600px] flex flex-col">
+                {/* Search + Role filters — only on Users tab */}
+                {activeTab === "users" && (
+                    <div className="px-6 py-4 border-b flex flex-col sm:flex-row gap-3 items-start sm:items-center bg-muted/20">
+                        {/* Search */}
+                        <div className="relative flex-1 min-w-0">
+                            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                            <input
+                                type="text"
+                                value={searchQuery}
+                                onChange={(e) => setSearchQuery(e.target.value)}
+                                placeholder="Search by name or email…"
+                                className="w-full pl-9 pr-4 py-2 text-sm border rounded-xl bg-background focus:outline-none focus:ring-2 focus:ring-primary/20"
+                            />
+                            {searchQuery && (
+                                <button onClick={() => setSearchQuery("")} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground">
+                                    <X className="w-3.5 h-3.5" />
+                                </button>
+                            )}
+                        </div>
+                        {/* Role Pills */}
+                        <div className="flex flex-wrap gap-1.5 flex-shrink-0">
+                            {[
+                                { value: "all",       label: "All" },
+                                { value: "owner",     label: "Owner" },
+                                { value: "co_owner",  label: "Co-Owner" },
+                                { value: "publisher", label: "Publisher" },
+                                { value: "user",      label: "User" },
+                            ].map(({ value, label }) => (
+                                <button
+                                    key={value}
+                                    onClick={() => setRoleFilter(value)}
+                                    className={`px-3 py-1.5 rounded-full text-xs font-bold transition-all border ${
+                                        roleFilter === value
+                                            ? value === "all"       ? "bg-foreground text-background border-foreground"
+                                            : value === "owner"     ? "bg-red-500 text-white border-red-500"
+                                            : value === "co_owner"  ? "bg-purple-500 text-white border-purple-500"
+                                            : value === "publisher" ? "bg-blue-500 text-white border-blue-500"
+                                            :                         "bg-green-600 text-white border-green-600"
+                                            : "bg-background hover:bg-muted border-input"
+                                    }`}
+                                >
+                                    {label}
+                                </button>
+                            ))}
+                        </div>
+                    </div>
+                )}
                 <div className="flex-1">
                     {activeTab === "users" ? (
                         <div className="overflow-x-auto">

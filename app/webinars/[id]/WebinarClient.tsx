@@ -82,6 +82,8 @@ export default function WebinarClient({ webinar }: WebinarClientProps) {
     }, [user, webinar, checkIfJoined]);
 
     const handleJoinClick = () => {
+        if (isPast) return; // event is over, do nothing
+
         if (!user) {
             router.push("/auth?redirect=/webinars/" + webinar?._id);
             return;
@@ -151,6 +153,7 @@ export default function WebinarClient({ webinar }: WebinarClientProps) {
     }
 
     const eventDate = new Date(webinar.timestamp);
+    const isPast = eventDate < new Date();
 
     return (
         <div className="min-h-screen bg-background pb-20">
@@ -187,6 +190,11 @@ export default function WebinarClient({ webinar }: WebinarClientProps) {
                                     <Calendar className="w-5 h-5 text-primary" />
                                     <span className="font-medium text-foreground">{eventDate.toLocaleDateString(undefined, { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</span>
                                     <span>• {eventDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+                                    {isPast && (
+                                        <span className="px-2 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-red-500/10 text-red-500 border border-red-500/20">
+                                            Event Ended
+                                        </span>
+                                    )}
                                 </div>
                                 {webinar.venue && (
                                     <div className="flex items-center gap-2">
@@ -251,14 +259,29 @@ export default function WebinarClient({ webinar }: WebinarClientProps) {
 
                                 <button
                                     onClick={handleJoinClick}
-                                    disabled={isJoined || loading}
-                                    className={`w-full py-4 text-lg font-bold rounded-xl transition-all shadow-lg transform active:scale-95 ${isJoined
-                                        ? "bg-green-100 text-green-700 cursor-default shadow-none"
-                                        : "bg-primary text-primary-foreground hover:bg-primary/90 hover:shadow-primary/25"
-                                        } ${loading ? 'opacity-50 cursor-not-allowed' : ''}`}
+                                    disabled={isJoined || loading || isPast}
+                                    className={`w-full py-4 text-lg font-bold rounded-xl transition-all shadow-lg transform active:scale-95 ${
+                                        isPast
+                                            ? "bg-muted text-muted-foreground cursor-not-allowed shadow-none"
+                                            : isJoined
+                                                ? "bg-green-100 text-green-700 cursor-default shadow-none"
+                                                : "bg-primary text-primary-foreground hover:bg-primary/90 hover:shadow-primary/25"
+                                    } ${loading ? 'opacity-50 cursor-not-allowed' : ''}`}
                                 >
-                                    {loading ? "Checking status..." : (isJoined ? "You're Registered" : "Register Now")}
+                                    {loading
+                                        ? "Checking status..."
+                                        : isPast
+                                            ? "Registration Closed"
+                                            : isJoined
+                                                ? "You're Registered"
+                                                : "Register Now"}
                                 </button>
+
+                                {isPast && (
+                                    <p className="text-center text-sm text-muted-foreground">
+                                        This event has already taken place.
+                                    </p>
+                                )}
 
                                 {isJoined && (
                                     <p className="text-center text-sm text-muted-foreground">

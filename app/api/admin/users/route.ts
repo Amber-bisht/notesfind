@@ -20,10 +20,16 @@ export async function GET(req: NextRequest) {
         const limit = parseInt(searchParams.get('limit') || '10');
         const skip = (page - 1) * limit;
         const role = searchParams.get('role');
+        const search = searchParams.get('search')?.trim();
 
         await dbConnect();
 
-        const query = role ? { role: role as UserRole } : {};
+        const query: Record<string, unknown> = {};
+        if (role) query.role = role as UserRole;
+        if (search) {
+            const regex = { $regex: search, $options: 'i' };
+            query.$or = [{ name: regex }, { email: regex }];
+        }
 
         const [users, total] = await Promise.all([
             User.find(query)

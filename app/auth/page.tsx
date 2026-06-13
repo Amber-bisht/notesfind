@@ -11,6 +11,7 @@ function AuthContent() {
     const errorParam = searchParams.get('error');
     const redirectParam = searchParams.get('redirect');
     const [errorMsg, setErrorMsg] = useState<string | null>(null);
+    const [isBanned, setIsBanned] = useState(false);
     const [loading, setLoading] = useState(false);
 
     useEffect(() => {
@@ -20,7 +21,7 @@ function AuthContent() {
     useEffect(() => {
         if (errorParam) {
             if (errorParam === 'Your account has been banned.') {
-                setErrorMsg("You are banned, bitch!");
+                setIsBanned(true);
             } else if (errorParam === 'login_failed') {
                 setErrorMsg("Login failed. Please try again.");
             } else if (errorParam === 'login_error') {
@@ -58,7 +59,11 @@ function AuthContent() {
             } else {
                 const data = await res.json().catch(() => ({}));
                 const errorMessage = data.error || 'login_failed';
-                setErrorMsg(errorMessage === 'Your account has been banned.' ? "You are banned, bitch!" : errorMessage);
+                if (errorMessage === 'Your account has been banned.') {
+                    setIsBanned(true);
+                } else {
+                    setErrorMsg(errorMessage);
+                }
             }
         } catch (error) {
             console.error('Authentication Error:', error);
@@ -134,6 +139,38 @@ function AuthContent() {
     }, [mounted]);
 
     if (!mounted) return null;
+
+    // Full-screen banned block
+    if (isBanned) {
+        return (
+            <div className="flex flex-col items-center justify-center min-h-[70vh] px-4">
+                <div className="max-w-md w-full text-center space-y-6 p-8 border border-red-500/20 bg-red-500/5 rounded-2xl shadow-lg">
+                    <div className="w-16 h-16 rounded-full bg-red-500/10 flex items-center justify-center mx-auto text-4xl">
+                        🚫
+                    </div>
+                    <div className="space-y-2">
+                        <h1 className="text-2xl font-black text-red-500">Account Suspended</h1>
+                        <p className="text-muted-foreground text-sm leading-relaxed">
+                            Your account has been suspended by the NoteFind team.
+                            If you believe this is a mistake or need help, please reach out to our support team.
+                        </p>
+                    </div>
+                    <div className="p-4 rounded-xl bg-card border space-y-1">
+                        <p className="text-xs text-muted-foreground uppercase tracking-wider font-bold">Contact Support</p>
+                        <a
+                            href="mailto:notefind@gmail.com"
+                            className="text-primary font-semibold hover:underline text-sm"
+                        >
+                            notefind@gmail.com
+                        </a>
+                    </div>
+                    <p className="text-xs text-muted-foreground">
+                        Please include your registered email address when contacting support.
+                    </p>
+                </div>
+            </div>
+        );
+    }
 
     return (
         <div className="flex flex-col items-center justify-center min-h-[60vh] space-y-6">
